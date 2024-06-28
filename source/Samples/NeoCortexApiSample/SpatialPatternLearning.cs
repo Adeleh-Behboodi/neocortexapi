@@ -430,8 +430,8 @@ namespace NeoCortexApiSample
         /// <returns>An array of integers representing the binary data of the image.</returns>
         private static int[] BinarImage()
         {
-            NeoCortexUtils.BinarizeImage("E:\\SE\\neocortexapi\\Black_square.JPG", "E:\\SE\\neocortexapi\\abcs.txt", 130, "");
-            string file = "E:\\SE\\neocortexapi\\abcs.txt"; //..++ for image binarizer
+            NeoCortexUtils.BinarizeImage("D:\\Code-X\\neocortexapi\\Black_square.JPG", "D:\\Code-X\\neocortexapi\\abcs.txt", 130, "");
+            string file = "D:\\Code-X\\neocortexapi\\abcs.txt"; //..++ for image binarizer
 
             //NeoCortexUtils.BinarizeImage("E:\\SE\\Main projeh\\neocortexapi\\Black_square.JPG", "E:\\SE\\Main projeh\\abcs.txt", 130, "");
             //string file = "E:\\SE\\Main projeh\\abcs.txt"; //..++ for image binarizer

@@ -239,8 +239,7 @@ namespace NeoCortexApiSample
                     double similarity;
 
                     // Learn the input pattern.
-                    // Output lyrOut is the output of the last module in the layer.
-                    // 
+                    // Output lyrOut is the output of the last module in the layer. 
                     var lyrOut = cortexLayer.Compute((object)input, true) as int[];
 
                     // This is a general way to get the SpatialPooler result from the layer.

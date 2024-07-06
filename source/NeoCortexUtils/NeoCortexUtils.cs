@@ -53,6 +53,39 @@ namespace NeoCortex
 
             return binaryImage;
         }
+        public static string BinarizeImage(string mnistImage, int imageSize, string testname)
+        {
+            testname = "a";
+
+            string binaryImage = string.Empty;
+            
+            try
+            {
+                if (File.Exists(binaryImage))
+                {
+                    File.Delete(binaryImage);
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.Message);
+                Console.WriteLine(ex.StackTrace.ToString());
+            }
+            ImageBinarizer imageBinarizer = new ImageBinarizer(new BinarizerParams
+            {
+                RedThreshold = 200,
+                GreenThreshold = 200,
+                BlueThreshold = 200,
+                ImageWidth = imageSize,
+                ImageHeight = imageSize,
+                InputImagePath = mnistImage,
+                OutputImagePath = binaryImage
+            });
+
+            imageBinarizer.Run();
+
+            return binaryImage;
+        }
 
         /// <summary>
         /// Draws the bitmap from array of active columns.

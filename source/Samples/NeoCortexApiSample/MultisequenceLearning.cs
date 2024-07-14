@@ -14,11 +14,12 @@ namespace NeoCortexApiSample
 {
     /// <summary>
     /// Implements an experiment that demonstrates how to learn sequences.
-
+    /// </summary>
     public class MultiSequenceLearning
     {
         /// <summary>
         /// Runs the learning of sequences.
+        /// </summary>
         /// <param name="sequences">Dictionary of sequences. KEY is the sewuence name, the VALUE is th elist of element of the sequence.</param>
         public Predictor Run(Dictionary<string, List<double>> sequences)
         {
@@ -73,6 +74,9 @@ namespace NeoCortexApiSample
             return RunExperiment(inputBits, cfg, encoder, sequences);
         }
 
+        /// <summary>
+        ///
+        /// </summary>
         private Predictor RunExperiment(int inputBits, HtmConfig cfg, EncoderBase encoder, Dictionary<string, List<double>> sequences)
         {
             Stopwatch sw = new Stopwatch();
@@ -132,7 +136,9 @@ namespace NeoCortexApiSample
             
             int maxCycles = 3500;
 
+            //
             // Training SP to get stable. New-born stage.
+            //
 
             for (int i = 0; i < maxCycles && isInStableState == false; i++)
             {
@@ -140,13 +146,13 @@ namespace NeoCortexApiSample
 
                 cycle++;
 
-                Debug.WriteLine($" -------------- Newborn Cycle {cycle} ---------------");
+                Debug.WriteLine($"-------------- Newborn Cycle {cycle} ---------------");
 
                 foreach (var inputs in sequences)
                 {
                     foreach (var input in inputs.Value)
                     {
-                        Debug.WriteLine($" -------------- {inputs.Key} - {input} --------------");
+                        Debug.WriteLine($" -- {inputs.Key} - {input} --");
                     
                         var lyrOut = layer1.Compute(input, true);
 
@@ -169,7 +175,7 @@ namespace NeoCortexApiSample
             // Loop over all sequences.
             foreach (var sequenceKeyPair in sequences)
             {
-                Debug.WriteLine($" -------------------- Sequences {sequenceKeyPair.Key} --------------------");
+                Debug.WriteLine($"-------------- Sequences {sequenceKeyPair.Key} ---------------");
 
                 int maxPrevInputs = sequenceKeyPair.Value.Count - 1;
 
@@ -190,12 +196,12 @@ namespace NeoCortexApiSample
 
                     Debug.WriteLine("");
 
-                    Debug.WriteLine($" -------------------- Cycle {cycle} -------------------- ");
+                    Debug.WriteLine($"-------------- Cycle {cycle} ---------------");
                     Debug.WriteLine("");
 
                     foreach (var input in sequenceKeyPair.Value)
                     {
-                        Debug.WriteLine($" -------------------- {input} --------------------");
+                        Debug.WriteLine($"-------------- {input} ---------------");
 
                         var lyrOut = layer1.Compute(input, true) as ComputeCycle;
 
@@ -278,14 +284,14 @@ namespace NeoCortexApiSample
                         if (maxMatchCnt >= 30)
                         {
                             sw.Stop();
-                            Debug.WriteLine($" Sequence learned. The algorithm is in the stable state after 30 repeats with with accuracy {accuracy} of maximum possible {maxMatchCnt}. Elapsed sequence {sequenceKeyPair.Key} learning time: {sw.Elapsed}.");
+                            Debug.WriteLine($"Sequence learned. The algorithm is in the stable state after 30 repeats with with accuracy {accuracy} of maximum possible {maxMatchCnt}. Elapsed sequence {sequenceKeyPair.Key} learning time: {sw.Elapsed}.");
                             isLearningCompleted = true;
                             break;
                         }
                     }
                     else if (maxMatchCnt > 0)
                     {
-                        Debug.WriteLine($" At 100% accuracy after {maxMatchCnt} repeats we get a drop of accuracy with accuracy {accuracy}. This indicates instable state. Learning will be continued.");
+                        Debug.WriteLine($"At 100% accuracy after {maxMatchCnt} repeats we get a drop of accuracy with accuracy {accuracy}. This indicates instable state. Learning will be continued.");
                         maxMatchCnt = 0;
                     }
 
@@ -297,7 +303,7 @@ namespace NeoCortexApiSample
                     throw new Exception($"The system didn't learn with expected acurracy!");
             }
 
-            Debug.WriteLine(" -------------------- END -------------------- ");
+            Debug.WriteLine("------------ END ------------");
            
             return new Predictor(layer1, mem, cls);
         }

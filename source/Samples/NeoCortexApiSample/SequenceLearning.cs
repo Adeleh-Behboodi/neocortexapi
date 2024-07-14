@@ -14,12 +14,12 @@ namespace NeoCortexApiSample
     /// <summary>
     /// Implements an experiment that demonstrates how to learn sequences.
     /// </summary>
-    [Obsolete(" Please use multisequence learning. ")]
+    [Obsolete("Please use multisequence learning.")]
     public class SequenceLearning
     {
         public void Run()
         {
-            Console.WriteLine($" Hello NeocortexApi! Experiment {nameof(SequenceLearning)}");
+            Console.WriteLine($"Hello NeocortexApi! Experiment {nameof(SequenceLearning)}");
 
             int inputBits = 100;
             int numColumns = 1024;
@@ -76,6 +76,9 @@ namespace NeoCortexApiSample
             RunExperiment(inputBits, cfg, encoder, inputValues);
         }
 
+        /// <summary>
+        ///
+        /// </summary>
         private void RunExperiment(int inputBits, HtmConfig cfg, EncoderBase encoder, List<double> inputValues)
         {
             Stopwatch sw = new Stopwatch();
@@ -92,7 +95,7 @@ namespace NeoCortexApiSample
 
             var numInputs = inputValues.Distinct<double>().ToList().Count;
 
-            CortexLayer<object, object> layer1 = new CortexLayer<object, object>(" L1 ");
+            CortexLayer<object, object> layer1 = new CortexLayer<object, object>("L1");
 
             TemporalMemory tm = new TemporalMemory();
 
@@ -100,10 +103,10 @@ namespace NeoCortexApiSample
             {
                 if (isStable)
                     // Event should be fired when entering the stable state.
-                    Debug.WriteLine($" STABLE: Patterns: {numPatterns}, Inputs: {seenInputs}, iteration: {seenInputs / numPatterns}");
+                    Debug.WriteLine($"STABLE: Patterns: {numPatterns}, Inputs: {seenInputs}, iteration: {seenInputs / numPatterns}");
                 else
                     // Ideal SP should never enter unstable state after stable state.
-                    Debug.WriteLine($" INSTABLE: Patterns: {numPatterns}, Inputs: {seenInputs}, iteration: {seenInputs / numPatterns}");
+                    Debug.WriteLine($"INSTABLE: Patterns: {numPatterns}, Inputs: {seenInputs}, iteration: {seenInputs / numPatterns}");
 
                 // We are not learning in instable state.
                 learn = isInStableState = isStable;
@@ -147,9 +150,9 @@ namespace NeoCortexApiSample
             List<string> previousInputs = new List<string>();
             previousInputs.Add("-1.0");
 
-
+            //
             // Training SP to get stable. New-born stage.
-
+            //
 
             for (int i = 0; i < maxCycles; i++)
             {
@@ -157,7 +160,7 @@ namespace NeoCortexApiSample
 
                 cycle++;
 
-                Debug.WriteLine($" --------------------------- Newborn Cycle {cycle} --------------------------- ");
+                Debug.WriteLine($"-------------- Newborn Cycle {cycle} ---------------");
 
                 foreach (var input in inputs)
                 {
@@ -183,11 +186,11 @@ namespace NeoCortexApiSample
 
                 cycle++;
 
-                Debug.WriteLine($" -------------------------- Cycle {cycle} ---------------------------- ");
+                Debug.WriteLine($"-------------- Cycle {cycle} ---------------");
 
                 foreach (var input in inputs)
                 {
-                    Debug.WriteLine($" ------------------------------ {input} -------------------------");
+                    Debug.WriteLine($"-------------- {input} ---------------");
 
                     var lyrOut = layer1.Compute(input, learn) as ComputeCycle;
 
@@ -227,18 +230,18 @@ namespace NeoCortexApiSample
                         cls.Learn(key, actCells.ToArray());
 
                         if (learn == false)
-                            Debug.WriteLine($" Inference mode ");
+                            Debug.WriteLine($"Inference mode");
 
-                        Debug.WriteLine($" Col  SDR: {Helpers.StringifyVector(lyrOut.ActivColumnIndicies)} ");
-                        Debug.WriteLine($" Cell SDR: {Helpers.StringifyVector(actCells.Select(c => c.Index).ToArray())} ");
+                        Debug.WriteLine($"Col  SDR: {Helpers.StringifyVector(lyrOut.ActivColumnIndicies)}");
+                        Debug.WriteLine($"Cell SDR: {Helpers.StringifyVector(actCells.Select(c => c.Index).ToArray())}");
 
                         if (key == lastPredictedValue)
                         {
                             matches++;
-                            Debug.WriteLine($" Match. Actual value: {key} - Predicted value: {lastPredictedValue}");
+                            Debug.WriteLine($"Match. Actual value: {key} - Predicted value: {lastPredictedValue}");
                         }
                         else
-                            Debug.WriteLine($" Missmatch! Actual value: {key} - Predicted value: {lastPredictedValue}");
+                            Debug.WriteLine($"Missmatch! Actual value: {key} - Predicted value: {lastPredictedValue}");
 
                         if (lyrOut.PredictiveCells.Count > 0)
                         {
@@ -247,14 +250,14 @@ namespace NeoCortexApiSample
 
                             foreach (var item in predictedInputValues)
                             {
-                                Debug.WriteLine($" Current Input: {input} \t| Predicted Input: {item} ");
+                                Debug.WriteLine($"Current Input: {input} \t| Predicted Input: {item}");
                             }
 
                             lastPredictedValue = predictedInputValues.First().PredictedInput;
                         }
                         else
                         {
-                            Debug.WriteLine($" NO CELLS PREDICTED for next cycle. ");
+                            Debug.WriteLine($"NO CELLS PREDICTED for next cycle.");
                             lastPredictedValue = String.Empty;
                         }
                     }
@@ -265,30 +268,30 @@ namespace NeoCortexApiSample
 
                 double accuracy = (double)matches / (double)inputs.Length * 100.0;
 
-                Debug.WriteLine($" Cycle: {cycle}\tMatches={matches} of {inputs.Length}\t {accuracy}% ");
+                Debug.WriteLine($"Cycle: {cycle}\tMatches={matches} of {inputs.Length}\t {accuracy}%");
 
                 if (accuracy == 100.0)
                 {
                     maxMatchCnt++;
-                    Debug.WriteLine($" 100% accuracy reched {maxMatchCnt} times. ");
+                    Debug.WriteLine($"100% accuracy reched {maxMatchCnt} times.");
                     
                     // Experiment is completed if we are 30 cycles long at the 100% accuracy.
                     if (maxMatchCnt >= 30)
                     {
                         sw.Stop();
-                        Debug.WriteLine($" Exit experiment in the stable state after 30 repeats with 100% of accuracy. Elapsed time: {sw.ElapsedMilliseconds / 1000 / 60} min. ");
+                        Debug.WriteLine($"Exit experiment in the stable state after 30 repeats with 100% of accuracy. Elapsed time: {sw.ElapsedMilliseconds / 1000 / 60} min.");
                         learn = false;
                         break;
                     }
                 }
                 else if (maxMatchCnt > 0)
                 {
-                    Debug.WriteLine($" At 100% accuracy after {maxMatchCnt} repeats we get a drop of accuracy with {accuracy}. This indicates instable state. Learning will be continued. ");
+                    Debug.WriteLine($"At 100% accuracy after {maxMatchCnt} repeats we get a drop of accuracy with {accuracy}. This indicates instable state. Learning will be continued.");
                     maxMatchCnt = 0;
                 }
             }
 
-            Debug.WriteLine(" ------------------------------ END ------------------------------ ");
+            Debug.WriteLine("------------ END ------------");
         }
 
 

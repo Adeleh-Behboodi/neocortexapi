@@ -1304,13 +1304,14 @@ namespace NeoCortexApi.Entities
         public int ReadIntValue(String reader)
         {
             reader = reader.Trim();
-            if (string.IsNullOrEmpty(reader))
+            if (string.IsNullOrEmpty(reader) || string.IsNullOrWhiteSpace(reader))
             {
                 Debug.WriteLine(reader);
                 return 0;
             }
-            else
+            else if (Int32.TryParse(reader, out int result) == true)
                 return Convert.ToInt32(reader);
+            else return 0;
 
         }
 

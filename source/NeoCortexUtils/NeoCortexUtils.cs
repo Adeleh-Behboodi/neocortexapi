@@ -58,6 +58,7 @@ namespace NeoCortex
             testname = "a";
 
             string binaryImage = string.Empty;
+
             try
             {
                 if (File.Exists(binaryImage))
@@ -86,7 +87,6 @@ namespace NeoCortex
 
             return binaryImage;
         }
-
 
 
         /// <summary>

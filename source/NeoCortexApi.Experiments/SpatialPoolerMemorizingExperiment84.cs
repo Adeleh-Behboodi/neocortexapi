@@ -330,8 +330,19 @@ namespace NeoCortexApi.Experiments
                                 if (limit < hammingDistance.Length)
                                 {
                                     //hj
-                                    hammingArray[j, k] = Convert.ToInt32(hammingDistance[limit]);
-                                    limit++;
+                                    try
+                                    {
+                                        hammingArray[j, k] = Convert.ToInt32(hammingDistance[limit]);
+                                        limit++;
+                                    }
+                                    catch (System.Exception ex)
+                                    {
+                                        if (null != ex)
+                                        {
+                                            Console.WriteLine(ex.ToString());
+                                        }
+                                    }
+                                    
                                 }
                             }
                         }

@@ -27,7 +27,7 @@ namespace NeoCortexApiSample
     {
         public void Run()
         {
-            Console.WriteLine($"Hello NeocortexApi! Experiment {nameof(SpatialPatternLearning)}");
+            Console.WriteLine($" Hello NeocortexApi! Experiment {nameof(SpatialPatternLearning)} ");
 
             // Used as a boosting parameters
             // that ensure homeostatic plasticity effect.
@@ -59,9 +59,9 @@ namespace NeoCortexApiSample
                 StimulusThreshold = 10,
             };
             double max = 10;
-            Console.WriteLine("***** Please enter 1 for Integer,2 for Image *****");
+            Console.WriteLine(" ***** Please enter 1 for Integer,2 for Image ***** ");
             var x = Console.ReadLine(); // for the user to give the type of input
-            Console.WriteLine("***** Please wait for a while...");
+            Console.WriteLine(" ***** Please wait for a while... ");
 
             // If condition to check whether the input is integer or image 
 
@@ -418,9 +418,8 @@ namespace NeoCortexApiSample
             else
             {
                 // Handle case where probabilities dictionary is empty
-                Console.WriteLine("Warning: No elements in the 'probabilities' dictionary.");
+                Console.WriteLine(" Warning: No elements in the 'probabilities' dictionary. ");
             }
-
             return normalizedData;
         }
 
@@ -430,11 +429,11 @@ namespace NeoCortexApiSample
         /// <returns>An array of integers representing the binary data of the image.</returns>
         private static int[] BinarImage()
         {
-            NeoCortexUtils.BinarizeImage("D:\\Code-X\\neocortexapi\\Black_square.JPG", "D:\\Code-X\\neocortexapi\\abcs.txt", 130, "");
-            string file = "D:\\Code-X\\neocortexapi\\abcs.txt"; //..++ for image binarizer
+            //NeoCortexUtils.BinarizeImage("D:\\Code-X\\neocortexapi\\Black_square.JPG", "D:\\Code-X\\neocortexapi\\abcs.txt", 130, "");
+            //string file = "D:\\Code-X\\neocortexapi\\abcs.txt"; //..++ for image binarizer
 
-            //NeoCortexUtils.BinarizeImage("E:\\SE\\Main projeh\\neocortexapi\\Black_square.JPG", "E:\\SE\\Main projeh\\abcs.txt", 130, "");
-            //string file = "E:\\SE\\Main projeh\\abcs.txt"; //..++ for image binarizer
+            NeoCortexUtils.BinarizeImage("~\\images\\Black_square.jpg", "~\\textfiles\\abcs.txt", 130, "");
+            string file = "~\\textfiles\\abcs.txt"; //..++ for image binarizer
 
             string n = "";
 

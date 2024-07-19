@@ -250,7 +250,7 @@ namespace NeoCortexApi.Classifiers
             throw new NotImplementedException("This method will be removed in the future. Use GetPredictedInputValues instead.");
             // bool x = false;
             //double maxSameBits = 0;
-            //TIN predictedValue = default;
+            TIN predictedValue = default;
 
             //if (predictiveCells.Length != 0)
             //{
@@ -352,7 +352,7 @@ namespace NeoCortexApi.Classifiers
 
         /// <summary>
         /// Traces out all cell indicies grouped by input value.
-        /// </summary>
+
         public string TraceState(string fileName = null)
         {
             StringWriter strSw = new StringWriter();
@@ -373,7 +373,7 @@ namespace NeoCortexApi.Classifiers
                 strSw.WriteLine($"{Helpers.StringifyVector(item.Value.Last())}");
             }
 
-            strSw.WriteLine("........... Cell State .............");
+            strSw.WriteLine(" ........... Cell State ............. ");
 
             foreach (var item in m_AllInputs)
             {
@@ -406,7 +406,6 @@ namespace NeoCortexApi.Classifiers
         /*
     /// <summary>
     /// Traces out all cell indicies grouped by input value.
-    /// </summary>
     public void TraceState2(string fileName = null)
     {
 

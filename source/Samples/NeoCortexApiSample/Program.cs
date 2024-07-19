@@ -62,7 +62,7 @@ namespace NeoCortexApiSample
             sequences.Add("S2", new List<double>(new double[] { 8.0, 1.0, 2.0, 9.0, 10.0, 7.0, 11.00 })); 
 
             //
-            // Prototype for building the prediction engine.
+             // Prototype for building the prediction engine.
             MultiSequenceLearning experiment = new MultiSequenceLearning();
             var predictor = experiment.Run(sequences);
 

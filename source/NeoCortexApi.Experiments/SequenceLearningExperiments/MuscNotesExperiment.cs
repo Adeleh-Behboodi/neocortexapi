@@ -21,7 +21,7 @@ namespace NeoCortexApi.Experiments
         /// <summary>
         /// Experiment that defines a template code structure for general testing of sequence learning.
         /// Originally, it was designed to learn music notes, but it can be used with any kind of input.
-        /// </summary>
+
         [TestMethod]
         [TestCategory("Experiment")]
         [Timeout(TestTimeout.Infinite)]
@@ -132,11 +132,6 @@ namespace NeoCortexApi.Experiments
             RunExperiment(inputBits, p, encoder, inputValues);
         }
 
-
-
-        /// <summary>
-        ///
-        /// </summary>
         private void RunExperiment(int inputBits, Parameters p, EncoderBase encoder, List<double> inputValues)
         {
             Stopwatch sw = new Stopwatch();

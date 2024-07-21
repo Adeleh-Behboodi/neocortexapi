@@ -11,7 +11,6 @@ using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Security.Cryptography.X509Certificates;
-using Org.BouncyCastle.Bcpg.OpenPgp;
 
 namespace NeoCortex
 {
@@ -31,6 +30,8 @@ namespace NeoCortex
         public static string BinarizeImage(string mnistImage, string binaryImage, int imageSize,string testname)
         {
             testname = "a";
+
+
 
             if (File.Exists(binaryImage))
             {
@@ -65,6 +66,7 @@ namespace NeoCortex
                 {
                     File.Delete(binaryImage);
                 }
+
             }
             catch (Exception ex)
             {
@@ -88,6 +90,7 @@ namespace NeoCortex
             return binaryImage;
         }
 
+        // myself
 
         /// <summary>
         /// Draws the bitmap from array of active columns.

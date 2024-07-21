@@ -1,0 +1,9 @@
+Column dimension: 32    |Potential Radius: 10| Inhibition type: Global  | Total time: 66,871 milliseconds (66.87 seconds).
+Column dimension: 32    |Potential Radius: 10| Inhibition type: Global  | Total time: 64,825 milliseconds (64.83 seconds).
+Column dimension: 32    |Potential Radius: 10| Inhibition type: Global  | Total time: 67,578 milliseconds (67.58 seconds).
+Column dimension: 32    |Potential Radius: 10| Inhibition type: Global  | Total time: 65,656 milliseconds (65.66 seconds).
+Column dimension: 32    |Potential Radius: 10| Inhibition type: Global  | Total time: 65,465 milliseconds (65.47 seconds).
+Column dimension: 32    |Potential Radius: 10| Inhibition type: Global  | Total time: 65,742 milliseconds (65.74 seconds).
+Column dimension: 32    |Potential Radius: 10| Inhibition type: Global  | Total time: 64,786 milliseconds (64.79 seconds).
+Column dimension: 32    |Potential Radius: 10| Inhibition type: Global  | Total time: 65,715 milliseconds (65.72 seconds).
+Column dimension: 32    |Potential Radius: 10| Inhibition type: Global  | Total time: 65,861 milliseconds (65.86 seconds).

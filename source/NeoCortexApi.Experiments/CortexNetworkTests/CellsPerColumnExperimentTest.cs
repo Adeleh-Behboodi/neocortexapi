@@ -14,7 +14,7 @@ namespace NeoCortexApi.Experiments
 {
     /// <summary>
     /// Check out student paper in the following URL: https://github.com/ddobric/neocortexapi/blob/master/NeoCortexApi/Documentation/Experiments/ML-19-20_20-5.4_CellsPerColumnExperiment_Paper.pdf
-    /// </summary>
+
     [TestClass]
     public class CellsPerColumnExperimentTest
     {
@@ -29,18 +29,15 @@ namespace NeoCortexApi.Experiments
         /// Then the parent loop is incremented and it continues for the number of iter defined. In this case it is 30.
         /// Iter is simply the the number of times,the whole experiment is repeated to achieve accurate results.
 
-
-        /// </summary>
-
         [TestMethod]
         [TestCategory("Experiment")]
         [TestCategory("NetworkTests")]
-        [DataRow(1, 30)]   //Cells =1 , iter = 30                         
-        [DataRow(2, 30)] //Cells =2 , iter = 30
-        [DataRow(3, 30)] //Cells =3 , iter = 30
-        [DataRow(4, 30)] //Cells =4 , iter = 30 
-        [DataRow(5, 30)] //Cells =5 , iter = 30 
-        [DataRow(7, 30)] //Cells =7 , iter = 30 
+        [DataRow(1, 30)]  //Cells =1 , iter = 30                         
+        [DataRow(2, 30)]  //Cells =2 , iter = 30
+        [DataRow(3, 30)]  //Cells =3 , iter = 30
+        [DataRow(4, 30)]  //Cells =4 , iter = 30 
+        [DataRow(5, 30)]  //Cells =5 , iter = 30 
+        [DataRow(7, 30)]  //Cells =7 , iter = 30 
         [DataRow(10, 30)] //Cells =10 , iter = 30 
         [DataRow(20, 30)] //Cells =20 , iter = 30
         public void CellPerColumn(int C, int loop)
@@ -115,7 +112,6 @@ namespace NeoCortexApi.Experiments
 
                     double[] inputs = lst.ToArray();
 
-                    //
                     // This trains SP.
                     foreach (var input in inputs)
                     {
@@ -133,7 +129,7 @@ namespace NeoCortexApi.Experiments
                     int matches = 0;
 
                     double lastPredictedValue = 0;
-                    //
+
                     // Now, training with SP+TM. SP is pretrained on pattern.
                     //Child loop / Inner loop
 
@@ -147,11 +143,11 @@ namespace NeoCortexApi.Experiments
 
                             cls.Learn(input, lyrOut.ActiveCells.ToArray());
 
-                            Debug.WriteLine($"-------------- {input} ---------------");
+                            Debug.WriteLine($" ------------------------------ {input} ------------------------------ ");
 
                             if (learn == false)
-                                Debug.WriteLine($"Inference mode");
-
+                                
+                            Debug.WriteLine($"Inference mode");
                             Debug.WriteLine($"W: {Helpers.StringifyVector(lyrOut.WinnerCells.Select(c => c.Index).ToArray())}");
                             Debug.WriteLine($"P: {Helpers.StringifyVector(lyrOut.PredictiveCells.Select(c => c.Index).ToArray())}");
 
@@ -165,9 +161,11 @@ namespace NeoCortexApi.Experiments
                                 Debug.WriteLine($"Match {input}");
                             }
                             else
+                            
                                 Debug.WriteLine($"Missmatch Actual value: {input} - Predicted value: {lastPredictedValue}");
 
                             lastPredictedValue = predictedValue;
+                            
                         }
 
                         if (i == 500)

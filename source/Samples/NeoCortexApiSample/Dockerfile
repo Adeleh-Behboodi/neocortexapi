@@ -7,7 +7,6 @@ WORKDIR /app
 FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
 ARG BUILD_CONFIGURATION=Release
 WORKDIR /src
-COPY ["nuget.config", "."]
 COPY ["Samples/NeoCortexApiSample/NeoCortexApiSample.csproj", "Samples/NeoCortexApiSample/"]
 COPY ["NeoCortexApi/NeoCortexApi.csproj", "NeoCortexApi/"]
 COPY ["NeoCortexArrayLib/NeoCortexArrayLib.csproj", "NeoCortexArrayLib/"]

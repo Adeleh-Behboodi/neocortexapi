@@ -54,6 +54,7 @@ namespace NeoCortex
             return binaryImage;
         }
 
+
         public static string BinarizeImage(string mnistImage, int imageSize, string testname)
         {
             testname = "a";
@@ -73,7 +74,6 @@ namespace NeoCortex
                 Console.WriteLine(ex.Message);
                 Console.WriteLine(ex.StackTrace.ToString());
             }
-
             ImageBinarizer imageBinarizer = new ImageBinarizer(new BinarizerParams
             {
                 RedThreshold = 200,
@@ -89,8 +89,6 @@ namespace NeoCortex
 
             return binaryImage;
         }
-
-        // myself
 
         /// <summary>
         /// Draws the bitmap from array of active columns.

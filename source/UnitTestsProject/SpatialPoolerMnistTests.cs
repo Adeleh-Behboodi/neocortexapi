@@ -43,9 +43,6 @@ namespace UnitTestsProject
 
             var trainingImages = Directory.GetFiles(Path.Combine(trainingFolder, digit));
 
-            //if (Directory.Exists(TestOutputFolder))
-            //    Directory.Delete(TestOutputFolder, true);
-
             Directory.CreateDirectory(TestOutputFolder);
 
             Directory.CreateDirectory($"{TestOutputFolder}\\{digit}");
@@ -63,18 +60,33 @@ namespace UnitTestsProject
                     //parameters.setInputDimensions(new int[] { imageSize[imSizeIndx], imageSize[imSizeIndx] });
                     //parameters.setColumnDimensions(new int[] { topologies[topologyIndx], topologies[topologyIndx] });
                     //parameters.setNumActiveColumnsPerInhArea(0.02 * numOfActCols);
+
+                    //parameters.Set(KEY.DUTY_CYCLE_PERIOD, 20);
+                    //parameters.Set(KEY.MAX_BOOST, 1);
+                    //parameters.setInputDimensions(new int[] { imageSize[imSizeIndx], imageSize[imSizeIndx] });
+                    //parameters.setColumnDimensions(new int[] { topologies[topologyIndx], topologies[topologyIndx] });
+                    //parameters.setNumActiveColumnsPerInhArea(0.02 * numOfActCols);
+                    //parameters.Set(KEY.DUTY_CYCLE_PERIOD, 20);
+                    //parameters.Set(KEY.MAX_BOOST, 1);
+                    //parameters.setInputDimensions(new int[] { imageSize[imSizeIndx], imageSize[imSizeIndx] });
+                    //parameters.setColumnDimensions(new int[] { topologies[topologyIndx], topologies[topologyIndx] });
+                    //parameters.setNumActiveColumnsPerInhArea(0.02 * numOfActCols);
+
                     parameters.Set(KEY.NUM_ACTIVE_COLUMNS_PER_INH_AREA, 0.06 * 64 * 64/*imageSizes[imSizeIndx] * imageSizes[imSizeIndx]*/);
                     parameters.Set(KEY.POTENTIAL_RADIUS, imageSizes[imSizeIndx] * imageSizes[imSizeIndx]/*(int)0.5 * imageSizes[imSizeIndx]*/);
                     parameters.Set(KEY.POTENTIAL_PCT, 1.0);
                     parameters.Set(KEY.GLOBAL_INHIBITION, true);
 
+
+                    //parameters.Set(KEY.DUTY_CYCLE_PERIOD, 20);
+                    //parameters.Set(KEY.MAX_BOOST, 1);
+                    //parameters.setInputDimensions(new int[] { imageSize[imSizeIndx], imageSize[imSizeIndx] });
+                    //parameters.setColumnDimensions(new int[] { topologies[topologyIndx], topologies[topologyIndx] });
+                    //parameters.setNumActiveColumnsPerInhArea(0.02 * numOfActCols);
+
                     parameters.Set(KEY.STIMULUS_THRESHOLD, 50.0);       //***
                     parameters.Set(KEY.SYN_PERM_INACTIVE_DEC, 0.008);   //***
                     parameters.Set(KEY.SYN_PERM_ACTIVE_INC, 0.05);      //***
-
-                    //parameters.Set(KEY.STIMULUS_THRESHOLD, 0.0);       //***
-                    //parameters.Set(KEY.SYN_PERM_INACTIVE_DEC, 0.0);   //***
-                    //parameters.Set(KEY.SYN_PERM_ACTIVE_INC, 0.0);      //***
 
                     parameters.Set(KEY.INHIBITION_RADIUS, (int)0.025 * imageSizes[imSizeIndx] * imageSizes[imSizeIndx]);
 
@@ -291,6 +303,18 @@ namespace UnitTestsProject
 
                 //calcCrossOverlapsPerDigit(testOutputFolder, fileActCols);
                 //calcCrossOverlapsBetweenImages(testOutputFolder, fileActCols);
+                //calcCrossOverlapsPerDigit(testOutputFolder, fileActCols);
+                //calcCrossOverlapsBetweenImages(testOutputFolder, fileActCols);
+
+                //calcCrossOverlapsPerDigit(testOutputFolder, fileActCols);
+                //calcCrossOverlapsBetweenImages(testOutputFolder, fileActCols);
+                //calcCrossOverlapsPerDigit(testOutputFolder, fileActCols);
+                //calcCrossOverlapsBetweenImages(testOutputFolder, fileActCols);
+                //calcCrossOverlapsPerDigit(testOutputFolder, fileActCols);
+                //calcCrossOverlapsBetweenImages(testOutputFolder, fileActCols);
+                //calcCrossOverlapsPerDigit(testOutputFolder, fileActCols);
+                //calcCrossOverlapsBetweenImages(testOutputFolder, fileActCols);
+
             }
         }
 
@@ -1156,4 +1180,5 @@ namespace UnitTestsProject
         [VectorType(64)]
         public Boolean[] PixelValues;
     }
+
 }

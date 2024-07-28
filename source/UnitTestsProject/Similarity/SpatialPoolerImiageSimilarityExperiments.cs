@@ -28,26 +28,27 @@ namespace UnitTestsProject
         /// <param name="inputPrefix"></param>
         [TestMethod]
         [TestCategory("LongRunning")]
-        //[DataRow("digit7")]
-        //[DataRow("digit5")]
         [DataRow("Vertical")]
-        //[DataRow("Box")]
-        //[DataRow("Horizontal")]
+
         public void ImageSimilarityExperiment(string inputPrefix)
         {
             //int stableStateCnt = 100;
+            //int numColumns = colDims[0];
+            //int inputBits = 100;
+
             double minOctOverlapCycles = 1.0;
             double maxBoost = 10.0;
-            //int inputBits = 100;
+
             var colDims = new int[] { 64, 64 };
             int numOfCols = 64 * 64;
-            //int numColumns = colDims[0];
+            
+
 
             string trainingFolder = "Similarity\\TestFiles";
             int imgSize = 28;
+            
             //var colDims = new int[] { 64, 64 };
             //int numOfActCols = colDims[0] * colDims[1];
-
             string TestOutputFolder = $"Output-{nameof(ImageSimilarityExperiment)}";
 
             var trainingImages = Directory.GetFiles(trainingFolder, $"{inputPrefix}*.png");
@@ -55,33 +56,6 @@ namespace UnitTestsProject
             Directory.CreateDirectory($"{nameof(ImageSimilarityExperiment)}");
 
             int counter = 0;
-            //var parameters = GetDefaultParams();
-            ////parameters.Set(KEY.DUTY_CYCLE_PERIOD, 20);
-            ////parameters.Set(KEY.MAX_BOOST, 1);
-            ////parameters.setInputDimensions(new int[] { imageSize[imSizeIndx], imageSize[imSizeIndx] });
-            ////parameters.setColumnDimensions(new int[] { topologies[topologyIndx], topologies[topologyIndx] });
-            ////parameters.setNumActiveColumnsPerInhArea(0.02 * numOfActCols);
-            //parameters.Set(KEY.NUM_ACTIVE_COLUMNS_PER_INH_AREA, 0.06 * 4096); // TODO. Experiment with different sizes
-            //parameters.Set(KEY.POTENTIAL_RADIUS, imgSize * imgSize);
-            //parameters.Set(KEY.POTENTIAL_PCT, 1.0);
-            //parameters.Set(KEY.GLOBAL_INHIBITION, true); // TODO: Experiment with local inhibition too. Note also the execution time of the experiment.
-
-            //// Num of active synapces in order to activate the column.
-            //parameters.Set(KEY.STIMULUS_THRESHOLD, 50.0);
-            //parameters.Set(KEY.SYN_PERM_INACTIVE_DEC, 0.008);
-            //parameters.Set(KEY.SYN_PERM_ACTIVE_INC, 0.05);
-
-            //parameters.Set(KEY.INHIBITION_RADIUS, (int)0.02 * imgSize * imgSize); // TODO. check if this has influence in a case of the global inhibition. ALso check how this parameter influences the similarity of SDR.
-
-            //parameters.Set(KEY.SYN_PERM_CONNECTED, 0.2);
-            //parameters.Set(KEY.MIN_PCT_OVERLAP_DUTY_CYCLES, 0.001);
-            //parameters.Set(KEY.MIN_PCT_ACTIVE_DUTY_CYCLES, 0.001);
-            //parameters.Set(KEY.DUTY_CYCLE_PERIOD, 1000);
-            //parameters.Set(KEY.MAX_BOOST, 100);
-            //parameters.Set(KEY.WRAP_AROUND, true);
-            //parameters.Set(KEY.SEED, 1969);
-            //parameters.setInputDimensions(new int[] { imgSize, imgSize });
-            //parameters.setColumnDimensions(colDims);
 
             Parameters p = Parameters.getAllDefaultParameters();
             p.Set(KEY.RANDOM, new ThreadSafeRandom(42));
@@ -235,34 +209,6 @@ namespace UnitTestsProject
 
             Directory.CreateDirectory($"{nameof(ImageSimilarityExperiment)}");
 
-            //int counter = 0;
-            //var parameters = GetDefaultParams();
-            ////parameters.Set(KEY.DUTY_CYCLE_PERIOD, 20);
-            ////parameters.Set(KEY.MAX_BOOST, 1);
-            ////parameters.setInputDimensions(new int[] { imageSize[imSizeIndx], imageSize[imSizeIndx] });
-            ////parameters.setColumnDimensions(new int[] { topologies[topologyIndx], topologies[topologyIndx] });
-            ////parameters.setNumActiveColumnsPerInhArea(0.02 * numOfActCols);
-            //parameters.Set(KEY.NUM_ACTIVE_COLUMNS_PER_INH_AREA, 0.06 * 4096); // TODO. Experiment with different sizes
-            //parameters.Set(KEY.POTENTIAL_RADIUS, inputBits);
-            //parameters.Set(KEY.POTENTIAL_PCT, 1.0);
-            //parameters.Set(KEY.GLOBAL_INHIBITION, true); // TODO: Experiment with local inhibition too. Note also the execution time of the experiment.
-
-            //// Num of active synapces in order to activate the column.
-            //parameters.Set(KEY.STIMULUS_THRESHOLD, 50.0);
-            //parameters.Set(KEY.SYN_PERM_INACTIVE_DEC, 0.008);
-            //parameters.Set(KEY.SYN_PERM_ACTIVE_INC, 0.05);
-
-            //parameters.Set(KEY.INHIBITION_RADIUS, (int)0.15 * inputBits); // TODO. check if this has influence in a case of the global inhibition. ALso check how this parameter influences the similarity of SDR.
-
-            //parameters.Set(KEY.SYN_PERM_CONNECTED, 0.2);
-            //parameters.Set(KEY.MIN_PCT_OVERLAP_DUTY_CYCLES, 1.0);
-            //parameters.Set(KEY.MIN_PCT_ACTIVE_DUTY_CYCLES, 0.001);
-            //parameters.Set(KEY.DUTY_CYCLE_PERIOD, 100);
-            //parameters.Set(KEY.MAX_BOOST, 10);
-            //parameters.Set(KEY.WRAP_AROUND, true);
-            //parameters.Set(KEY.SEED, 1969);
-            //parameters.setInputDimensions(new int[] {inputBits });
-            //parameters.setColumnDimensions(colDims);
 
             Parameters p = Parameters.getAllDefaultParameters();
             p.Set(KEY.RANDOM, new ThreadSafeRandom(42));
@@ -302,11 +248,8 @@ namespace UnitTestsProject
             };
 
             var encoder = new ScalarEncoder(settings);
-
             bool isInStableState = false;
-
             var mem = new Connections();
-
             p.apply(mem);
 
             var inputs = new int[] { 0, 1, 2, 3, 4, 5 };
@@ -375,43 +318,6 @@ namespace UnitTestsProject
                                 if (--stableStateCnt <= 0)
                                     return;
                             }
-                            /*
-                            if (isInStableState)
-                            {
-                                swActCol.WriteLine($"\nDigit {digit}");
-
-                                sdrs.Add(digit.ToString(), activeCols);
-
-                                // 
-                                // To be sure that same input produces the same output after entered the stable state.
-                                for (int i = 0; i < 100; i++)
-                                {
-                                    activeArray = new int[numOfActCols];
-
-                                    sp.compute(inputVector, activeArray, true);
-                                    
-                                    var distance = MathHelpers.GetHammingDistance(oldArray, activeArray, true);
-                                    
-                                    var actColsIndxes = ArrayUtils.IndexWhere(activeArray, i => i == 1);
-                                    var oldActColsIndxes = ArrayUtils.IndexWhere(oldArray, i => i == 1);
-
-                                    var similarity = MathHelpers.CalcArraySimilarity(actColsIndxes, oldActColsIndxes);
-
-                                    swHam.Write($"Digit {digit}: Dist/Similarity: {distance} | {similarity}\t");
-                                    Debug.Write($"Digit {digit}: Dist/Similarity: {distance} | {similarity}\t");
-                                    Debug.WriteLine($"{Helpers.StringifyVector(actColsIndxes)}");
-
-                                    if (i > 5 && similarity < 100)
-                                    { 
-                                    
-                                    }
-
-                                    oldArray = new int[numOfActCols];
-                                    activeArray.CopyTo(oldArray, 0);
-                                }
-                            }
-
-                            Debug.WriteLine($"Cycle {cycle++}");*/
                         }
 
                         cycle++;
@@ -421,7 +327,6 @@ namespace UnitTestsProject
                 }
             }
         }
-
 
         /// <summary>
         /// Calculates the similarity matrix . 
@@ -468,56 +373,6 @@ namespace UnitTestsProject
 
             return;
         }
-
-        #region Private Helpers
-
-        internal static Parameters GetDefaultParams()
-        {
-
-            ThreadSafeRandom rnd = new ThreadSafeRandom(42);
-
-            var parameters = Parameters.getAllDefaultParameters();
-            parameters.Set(KEY.POTENTIAL_RADIUS, 10);
-            parameters.Set(KEY.POTENTIAL_PCT, 0.75);
-            parameters.Set(KEY.GLOBAL_INHIBITION, false);
-            parameters.Set(KEY.LOCAL_AREA_DENSITY, -1);
-            parameters.Set(KEY.NUM_ACTIVE_COLUMNS_PER_INH_AREA, 50.0);
-            parameters.Set(KEY.STIMULUS_THRESHOLD, 0);
-            parameters.Set(KEY.SYN_PERM_INACTIVE_DEC, 0.01);
-            parameters.Set(KEY.SYN_PERM_ACTIVE_INC, 0.1);
-            parameters.Set(KEY.SYN_PERM_CONNECTED, 0.1);
-            parameters.Set(KEY.MIN_PCT_OVERLAP_DUTY_CYCLES, 0.001);
-            parameters.Set(KEY.MIN_PCT_ACTIVE_DUTY_CYCLES, 0.001);
-            //parameters.Set(KEY.WRAP_AROUND, false);
-            parameters.Set(KEY.DUTY_CYCLE_PERIOD, 100);
-            parameters.Set(KEY.MAX_BOOST, 10.0);
-            parameters.Set(KEY.RANDOM, rnd);
-            //int r = parameters.Get<int>(KEY.NUM_ACTIVE_COLUMNS_PER_INH_AREA);
-
-            /*
-            Random rnd = new Random(42);
-
-            var parameters = Parameters.getAllDefaultParameters();
-            parameters.Set(KEY.POTENTIAL_RADIUS, 16);
-            parameters.Set(KEY.POTENTIAL_PCT, 0.85);
-            parameters.Set(KEY.GLOBAL_INHIBITION, false);
-            parameters.Set(KEY.LOCAL_AREA_DENSITY, -1.0);
-            //parameters.Set(KEY.NUM_ACTIVE_COLUMNS_PER_INH_AREA, 3.0);
-            parameters.Set(KEY.STIMULUS_THRESHOLD, 0.0);
-            parameters.Set(KEY.SYN_PERM_INACTIVE_DEC, 0.01);
-            parameters.Set(KEY.SYN_PERM_ACTIVE_INC, 0.1);
-            parameters.Set(KEY.SYN_PERM_CONNECTED, 0.1);
-            parameters.Set(KEY.MIN_PCT_OVERLAP_DUTY_CYCLES, 0.1);
-            parameters.Set(KEY.MIN_PCT_ACTIVE_DUTY_CYCLES, 0.1);
-            parameters.Set(KEY.DUTY_CYCLE_PERIOD, 10);
-            parameters.Set(KEY.MAX_BOOST, 10.0);
-            parameters.Set(KEY.RANDOM, rnd);
-            //int r = parameters.Get<int>(KEY.NUM_ACTIVE_COLUMNS_PER_INH_AREA);
-            */
-            return parameters;
-        }
-
-        #endregion
 
     }
 }

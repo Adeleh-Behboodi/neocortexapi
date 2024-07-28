@@ -53,12 +53,9 @@ namespace NeoCortex
 
             return binaryImage;
         }
-
-
         public static string BinarizeImage(string mnistImage, int imageSize, string testname)
         {
             testname = "a";
-
             string binaryImage = string.Empty;
 
             try
@@ -67,13 +64,14 @@ namespace NeoCortex
                 {
                     File.Delete(binaryImage);
                 }
-
             }
             catch (Exception ex)
             {
-                Console.WriteLine(ex.Message);
-                Console.WriteLine(ex.StackTrace.ToString());
+
+                Console.WriteLine(ex.Message);  
             }
+            
+
             ImageBinarizer imageBinarizer = new ImageBinarizer(new BinarizerParams
             {
                 RedThreshold = 200,
@@ -89,7 +87,6 @@ namespace NeoCortex
 
             return binaryImage;
         }
-
         /// <summary>
         /// Draws the bitmap from array of active columns.
         /// </summary>
@@ -465,7 +462,7 @@ namespace NeoCortex
         public static double MeanOf(double[] colData)
         {
             if (colData == null || colData.Length < 2)
-                throw new ArgumentException("'coldData' cannot be null or empty!");
+                throw new ArgumentException(" 'coldData' cannot be null or empty! ");
 
             //calculate summ of the values
             double sum = 0;
@@ -487,13 +484,13 @@ namespace NeoCortex
         public static double CorrelationPearson(double[] data1, double[] data2)
         {
             if (data1 == null || data1.Length < 2)
-                throw new ArgumentException("'xData' cannot be null or empty!");
+                throw new ArgumentException(" 'xData' cannot be null or empty! ");
 
             if (data2 == null || data2.Length < 2)
-                throw new ArgumentException("'yData' cannot be null or empty!");
+                throw new ArgumentException(" 'yData' cannot be null or empty! ");
 
             if (data1.Length != data2.Length)
-                throw new ArgumentException("Both datasets must be of the same size!");
+                throw new ArgumentException(" Both datasets must be of the same size! ");
 
             //calculate average for each dataset
             double aav = MeanOf(data1);
@@ -517,8 +514,6 @@ namespace NeoCortex
         }
 
         /// <summary>
-        /// 
-        /// </summary>
         /// <param name="path"></param>
         /// <returns></returns>
         public static List<int> ReadCsvFileTest(String path)

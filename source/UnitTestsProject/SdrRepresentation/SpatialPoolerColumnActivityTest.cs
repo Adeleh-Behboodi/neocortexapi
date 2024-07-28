@@ -68,9 +68,7 @@ namespace UnitTestsProject.Sdr
             });
 
             SpatialPooler sp = new SpatialPoolerMT(hpa);
-
             sp.Init(connections);
-
             string outFolder = nameof(CreateSdrsTest);
             Directory.CreateDirectory(outFolder);
 
@@ -208,10 +206,5 @@ namespace UnitTestsProject.Sdr
 
             Assert.IsNotNull(res);
         }
-
-
-
     }
-
-
 }

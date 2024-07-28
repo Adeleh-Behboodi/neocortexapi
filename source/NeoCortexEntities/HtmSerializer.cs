@@ -133,7 +133,7 @@ namespace NeoCortexApi.Entities
         #region NewImplementation
         #region Serialization
 
-        
+
         private static void SerializeKeyValuePair(string name, object obj, StreamWriter sw)
         {
             var type = obj.GetType();
@@ -315,7 +315,7 @@ namespace NeoCortexApi.Entities
             sw.Write(content);
         }
 
- 
+
         private static void SerializeIEnumerable(string propertyName, object obj, StreamWriter sw, List<string> ignoreMembers = null)
         {
             var type = obj.GetType();
@@ -549,7 +549,7 @@ namespace NeoCortexApi.Entities
             SerializeEnd(name, sw, isSerializeWithType ? type : null);
         }
 
-        
+
 
         public static void SerializeObject(object obj, string name, StreamWriter sw, List<string> ignoreMembers = null)
         {
@@ -1304,13 +1304,14 @@ namespace NeoCortexApi.Entities
         public int ReadIntValue(String reader)
         {
             reader = reader.Trim();
-            if (string.IsNullOrEmpty(reader))
+            if (string.IsNullOrEmpty(reader) || string.IsNullOrWhiteSpace(reader))
             {
                 Debug.WriteLine(reader);
                 return 0;
             }
-            else
+            else if (Int32.TryParse(reader, out int result) == true)
                 return Convert.ToInt32(reader);
+            else return 0;
 
         }
 

@@ -1234,7 +1234,7 @@ namespace UnitTestsProject
                 var result = (int[])cortexLayer1.Compute(input, false);
                 Assert.IsTrue(expectedResult.SequenceEqual(result));
             }
-            
+
         }
         [TestMethod]
         [TestCategory("working-experiment")]
@@ -1436,15 +1436,16 @@ namespace UnitTestsProject
 
                 FileInfo fileInfo = new FileInfo(fileName);
                 Console.WriteLine(fileInfo.Length);
-            }        
+            }
         }
-        
+
         [TestMethod]
         [TestCategory("working-experiment")]
         [DataRow(128, 50)]
         [DataRow(256, 50)]
         [DataRow(512, 50)]
         public void SerializationCortexLayerSpatialPoolerDurationTest(int numColumns, int numIterations)
+
         {
             // Used as a boosting parameters
             // that ensure homeostatic plasticity effect.
@@ -1639,7 +1640,7 @@ namespace UnitTestsProject
                 }
                 stopwatch.Stop();
                 Console.WriteLine(stopwatch.ElapsedMilliseconds);
-            }        
+            }
         }
 
 

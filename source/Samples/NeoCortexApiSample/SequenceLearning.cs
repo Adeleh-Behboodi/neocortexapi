@@ -13,7 +13,6 @@ namespace NeoCortexApiSample
 {
     /// <summary>
     /// Implements an experiment that demonstrates how to learn sequences.
-    /// </summary>
     [Obsolete("Please use multisequence learning.")]
     public class SequenceLearning
     {
@@ -77,8 +76,6 @@ namespace NeoCortexApiSample
         }
 
         /// <summary>
-        ///
-        /// </summary>
         private void RunExperiment(int inputBits, HtmConfig cfg, EncoderBase encoder, List<double> inputValues)
         {
             Stopwatch sw = new Stopwatch();
@@ -112,7 +109,7 @@ namespace NeoCortexApiSample
                 learn = isInStableState = isStable;
 
                 //if (isStable && layer1.HtmModules.ContainsKey("tm") == false)
-                //    layer1.HtmModules.Add("tm", tm);
+                // layer1.HtmModules.Add("tm", tm);
 
                 // Clear all learned patterns in the classifier.
                 cls.ClearState();
@@ -152,7 +149,6 @@ namespace NeoCortexApiSample
 
             //
             // Training SP to get stable. New-born stage.
-            //
 
             for (int i = 0; i < maxCycles; i++)
             {

@@ -30,8 +30,6 @@ namespace NeoCortexApi.Experiments
         /// Iter is simply the the number of times,the whole experiment is repeated to achieve accurate results.
 
 
-        /// </summary>
-
         [TestMethod]
         [TestCategory("Experiment")]
         [TestCategory("NetworkTests")]
@@ -93,13 +91,6 @@ namespace NeoCortexApi.Experiments
 
                     List<double> lst = new List<double>() { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9 };
 
-                    // Later we run the whole experiment for all the below input sequences
-
-                    // List<double> lst = new List<double>() { 1, 2, 2, 3, 4, 4, 5, 6, 6, 7, 8 };
-                    // List<double> lst = new List<double>() { 1, 2, 3, 1, 2, 4 };
-                    // List<double> lst = new List<double>() { 1, 2, 3, 4, 1, 2, 3, 5 };
-                    // List<double> lst = new List<double>() { 1, 2, 3, 4, 5, 1, 2, 3, 4, 5 };
-
                     settings["MaxVal"] = max;
 
                     EncoderBase encoder = new ScalarEncoder(settings);
@@ -115,7 +106,6 @@ namespace NeoCortexApi.Experiments
 
                     double[] inputs = lst.ToArray();
 
-                    //
                     // This trains SP.
                     foreach (var input in inputs)
                     {
@@ -133,7 +123,7 @@ namespace NeoCortexApi.Experiments
                     int matches = 0;
 
                     double lastPredictedValue = 0;
-                    //
+                    
                     // Now, training with SP+TM. SP is pretrained on pattern.
                     //Child loop / Inner loop
 

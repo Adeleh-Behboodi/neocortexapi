@@ -14,29 +14,28 @@ namespace NeoCortexApi.Classifiers
 {
     /// <summary>
     /// Defines the predicting input.
-    /// </summary>
+
     public class ClassifierResult<TIN>
     {
         /// <summary>
         /// The predicted input value.
-        /// </summary>
+
         public TIN PredictedInput { get; set; }
 
         /// <summary>
         /// Number of identical non-zero bits in the SDR.
-        /// </summary>
+
         public int NumOfSameBits { get; set; }
 
         /// <summary>
         /// The similarity between the SDR of  predicted cell set with the SDR of the input.
-        /// </summary>
+
         public double Similarity { get; set; }
     }
 
 
     /// <summary>
     /// Classifier implementation which memorize all seen values.
-    /// </summary>
     /// <typeparam name="TIN"></typeparam>
     /// <typeparam name="TOUT"></typeparam>
     public class HtmClassifier<TIN, TOUT> : IClassifier<TIN, TOUT>
@@ -49,17 +48,16 @@ namespace NeoCortexApi.Classifiers
 
         /// <summary>
         /// Recording of all SDRs. See maxRecordedElements.
-        /// </summary>
+
         private Dictionary<TIN, List<int[]>> m_AllInputs = new Dictionary<TIN, List<int[]>>();
 
         /// <summary>
         /// Mapping between the input key and the SDR assootiated to the input.
-        /// </summary>
         //private Dictionary<TIN, int[]> m_ActiveMap2 = new Dictionary<TIN, int[]>();
 
         /// <summary>
         /// Clears th elearned state.
-        /// </summary>
+
         public void ClearState()
         {
             m_AllInputs.Clear();
@@ -67,7 +65,6 @@ namespace NeoCortexApi.Classifiers
 
         /// <summary>
         /// Checks if the same SDR is already stored under the given key.
-        /// </summary>
         /// <param name="input"></param>
         /// <param name="sdr"></param>
         /// <returns></returns>
@@ -108,7 +105,6 @@ namespace NeoCortexApi.Classifiers
 
         /// <summary>
         /// Assotiate specified input to the given set of predictive cells.
-        /// </summary>
         /// <param name="input">Any kind of input.</param>
         /// <param name="output">The SDR of the input as calculated by SP.</param>
         public void Learn(TIN input, Cell[] output)
@@ -120,7 +116,6 @@ namespace NeoCortexApi.Classifiers
 
         /// <summary>
         /// Assotiate specified input to the given set of predictive cells. This can also be used to classify Spatial Pooler Columns output as int array
-        /// </summary>
         /// <param name="input">Any kind of input.</param>
         /// <param name="output">The SDR of the input as calculated by SP as int array</param>
         public void Learn(TIN input, int[] cellIndicies)
@@ -157,7 +152,6 @@ namespace NeoCortexApi.Classifiers
 
         /// <summary>
         /// Gets multiple predicted values.
-        /// </summary>
         /// <param name="predictiveCells">The current set of predictive cells.</param>
         /// <param name="howMany">The number of predections to return.</param>
         /// <returns>List of predicted values with their similarities.</returns>
@@ -170,7 +164,6 @@ namespace NeoCortexApi.Classifiers
 
         /// <summary>
         /// Gets multiple predicted values. This can also be used to classify Spatial Pooler Columns output as int array
-        /// </summary>
         /// <param name="predictiveCells">The current set of predictive cells in int array.</param>
         /// <param name="howMany">The number of predections to return.</param>
         /// <returns>List of predicted values with their similarities.</returns>
@@ -237,11 +230,8 @@ namespace NeoCortexApi.Classifiers
             return res;
         }
 
-
-
         /// <summary>
         /// Gets predicted value for next cycle
-        /// </summary>
         /// <param name="predictiveCells">The list of predictive cells.</param>
         /// <returns></returns>
         [Obsolete("This method will be removed in the future. Use GetPredictedInputValues instead.")]
@@ -352,7 +342,6 @@ namespace NeoCortexApi.Classifiers
 
         /// <summary>
         /// Traces out all cell indicies grouped by input value.
-        /// </summary>
         public string TraceState(string fileName = null)
         {
             StringWriter strSw = new StringWriter();
@@ -444,7 +433,6 @@ namespace NeoCortexApi.Classifiers
     }
      */
 
-
         private string ComputeHash(byte[] rawData)
         {
             // Create a SHA256   
@@ -495,7 +483,6 @@ namespace NeoCortexApi.Classifiers
 
         /// <summary>
         /// Calculate correlations from every saved SDRs of 2 selected Labels in to a 2D double matrix 
-        /// </summary>
         /// <param name="label1">selected label 1</param>
         /// <param name="label2">selected label 2</param>
         /// <returns></returns>
@@ -542,7 +529,6 @@ namespace NeoCortexApi.Classifiers
 
         /// <summary>
         /// Calculate correlations from every saved SDRs of the selected Label with itself in to a 2D double matrix 
-        /// </summary>
         /// <param name="label">selected label</param>
         /// <returns></returns>
         public double[,] TraceAutoSimilarity(TIN label, bool visualize = false)
@@ -552,7 +538,6 @@ namespace NeoCortexApi.Classifiers
 
         /// <summary>
         /// Get the Max, Min and average value from the computed correlation matrix
-        /// </summary>
         /// <param name="correlationMat2D"></param>
         /// <returns></returns>
         public Dictionary<string, double> GetCorrelationStat(double[,] correlationMat2D)
@@ -589,7 +574,6 @@ namespace NeoCortexApi.Classifiers
 
         /// <summary>
         /// extension of the TraceCorrelationTwoLabel to get Correlation data of 2 specified labels Lists
-        /// </summary>
         /// <returns></returns>
         public Dictionary<(TIN, TIN), Dictionary<string, double>> TraceCorrelation(List<TIN> labels1, List<TIN> labels2)
         {
@@ -608,7 +592,6 @@ namespace NeoCortexApi.Classifiers
 
         /// <summary>
         /// extension of the TraceCorrelationTwoLabel to get all Correlation data
-        /// </summary>
         /// <returns></returns>
         public Dictionary<(TIN, TIN), Dictionary<string, double>> TraceCorrelation()
         {
@@ -617,7 +600,6 @@ namespace NeoCortexApi.Classifiers
 
         /// <summary>
         /// extension of the TraceCorrelationTwoLabel to get auto Correlation data of one list of labels
-        /// </summary>
         /// <returns></returns>
         public Dictionary<(TIN, TIN), Dictionary<string, double>> TraceCorrelation(List<TIN> labels)
         {
@@ -626,7 +608,6 @@ namespace NeoCortexApi.Classifiers
 
         /// <summary>
         /// output the correlation data matrix from TraceCorrelation of a List of labels with another label list to csv format 
-        /// </summary>
         /// <returns></returns>
         public List<string> RenderCorrelationMatrixToCSVFormat(List<TIN> labels1, List<TIN> labels2)
         {
@@ -669,7 +650,6 @@ namespace NeoCortexApi.Classifiers
 
         /// <summary>
         /// output the correlation data matrix from TraceCorrelation of all label in m_AllInputs with each other to csv format 
-        /// </summary>
         /// <returns></returns>
         public List<string> RenderCorrelationMatrixToCSVFormat()
         {
@@ -678,7 +658,6 @@ namespace NeoCortexApi.Classifiers
 
         /// <summary>
         /// output the correlation data matrix from TraceCorrelation of a List of labels with itself to csv format 
-        /// </summary>
         /// <returns></returns>
         public List<string> RenderCorrelationMatrixToCSVFormat(List<TIN> labels)
         {
@@ -687,7 +666,6 @@ namespace NeoCortexApi.Classifiers
 
         /// <summary>
         /// Print correlation table from 2 label lists
-        /// </summary>
         /// <param name="labels1"></param>
         /// <param name="labels2"></param>
         public void TraceSimilarities(List<TIN> labels1, List<TIN> labels2)
@@ -724,7 +702,6 @@ namespace NeoCortexApi.Classifiers
 
         /// <summary>
         /// Print correlation table from 1 label list with itself
-        /// </summary>
         public void TraceSimilarities(List<TIN> labels)
         {
             TraceSimilarities(labels, labels);
@@ -732,7 +709,6 @@ namespace NeoCortexApi.Classifiers
 
         /// <summary>
         /// Print correlation table from all labels in m_AllInputs
-        /// </summary>
         public void TraceSimilarities()
         {
             TraceSimilarities(m_AllInputs.Keys.ToList<TIN>(), m_AllInputs.Keys.ToList<TIN>());

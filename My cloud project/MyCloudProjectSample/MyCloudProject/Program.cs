@@ -31,7 +31,7 @@ namespace MyCloudProject
                 tokeSrc.Cancel();
             };
 
-            Console.WriteLine($"Started experiment: Implement the Spatial Pooler SDR Reconstruction ");
+            Console.WriteLine($"Started experiment: Implement the Spatial Pooler SDR Reconstruction.");
 
             // Init configuration
             var cfgRoot = Common.InitHelpers.InitConfiguration(args);
@@ -43,7 +43,7 @@ namespace MyCloudProject
           
             var logger = logFactory.CreateLogger("Train.Console");
 
-            logger?.LogInformation($"{DateTime.Now} -  Started experiment: Implement the Spatial Pooler SDR Reconstruction ");
+            logger?.LogInformation($"{DateTime.Now} - Started experiment: Implement the Spatial Pooler SDR Reconstruction.");
 
             IStorageProvider storageProvider = new AzureStorageProvider(cfgSec);
 
@@ -60,26 +60,40 @@ namespace MyCloudProject
                 {
                     try
                     {
+
                         // logging
+                        logger.LogInformation("Processing request."); // me
 
                         // Step 4.
                         var localFileWithInputArgs = await storageProvider.DownloadInputAsync(request.InputFile);
 
+
                         // logging
+                        logger.LogInformation("Downloaded input file: {InputFileName}", request.InputFile); // me
+
 
                         // Here is your SE Project code started.(Between steps 4 and 5).
                         IExperimentResult result = await experiment.RunAsync(localFileWithInputArgs);
 
+
                         // logging
+                        logger.LogInformation("Experiment run completed with result: {Result}", result); // me
+
 
                         // Step 5.
                         await storageProvider.UploadResultAsync("outputfile", result);
+                        logger.LogInformation("Uploaded result file: outputfile"); // me
+
 
                         // logging
 
                         await storageProvider.CommitRequestAsync(request);
 
                         // loggingx
+
+                        logger.LogInformation("Committed request.");  // me
+
+
                     }
                     catch (Exception ex)
                     {
@@ -93,7 +107,7 @@ namespace MyCloudProject
                 }
             }
 
-            logger?.LogInformation($"{DateTime.Now} -  Experiment exit: Implement the Spatial Pooler SDR Reconstruction ");
+            logger?.LogInformation($"{DateTime.Now} - Experiment exit: Implement the Spatial Pooler SDR Reconstruction.");
         }
 
 

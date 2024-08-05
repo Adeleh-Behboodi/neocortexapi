@@ -22,15 +22,28 @@ namespace MyExperiment
             configSection.Bind(_config);
         }
 
+
         public Task CommitRequestAsync(IExerimentRequest request)
         {
             throw new NotImplementedException();
         }
 
-        public Task<string> DownloadInputAsync(string fileName)
+        public async Task<string> DownloadInputAsync(string fileName)
         {
+            BlobContainerClient container = new BlobContainerClient("Read from config","sample-file");
+
+            await container.CreateIfNotExistsAsync();
+
+            BlobClient blob = container.GetBlobClient(fileName);
+            
+            
             throw new NotImplementedException();
         }
+
+
+
+
+
 
         public IExerimentRequest ReceiveExperimentRequestAsync(CancellationToken token)
         {

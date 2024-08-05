@@ -7,8 +7,11 @@ using MyExperiment;
 using System.Threading.Tasks;
 using Azure.Storage.Queues.Models;
 using Azure.Storage.Queues;
+using Azure.Storage.Blobs;
 using System.Text.Json;
 using System.Text;
+using System.Runtime.CompilerServices;
+using System.IO;
 
 namespace MyCloudProject
 {
@@ -62,32 +65,46 @@ namespace MyCloudProject
                     {
 
                         // logging
-                        logger.LogInformation("Processing request."); // me
 
                         // Step 4.
+
+                        logger.LogInformation($"Starting download of input file: {request.InputFile}");
+
                         var localFileWithInputArgs = await storageProvider.DownloadInputAsync(request.InputFile);
+                        logger.LogInformation($"Downloaded input file to: {localFileWithInputArgs}");
+
+                        // Checking the content and existence of the downloaded file
+
+                        if (File.Exists(localFileWithInputArgs))
+                        {
+                            logger.LogInformation($"File {localFileWithInputArgs} exists. Checking content...");
+                            string fileContent = await File.ReadAllTextAsync(localFileWithInputArgs);
+                            logger.LogInformation($"Content of {localFileWithInputArgs}: {fileContent.Substring(0, Math.Min(fileContent.Length, 100))}..."); // نمایش 100 کاراکتر اول
+                        }
+                        else
+                        {
+                            logger.LogError($"File {localFileWithInputArgs} does not exist.");
+                        }
+
 
 
                         // logging
-                        logger.LogInformation("Downloaded input file: {InputFileName}", request.InputFile); // me
-
 
                         // Here is your SE Project code started.(Between steps 4 and 5).
                         IExperimentResult result = await experiment.RunAsync(localFileWithInputArgs);
 
 
                         // logging
-                        logger.LogInformation("Experiment run completed with result: {Result}", result); // me
-
 
                         // Step 5.
                         await storageProvider.UploadResultAsync("outputfile", result);
-                        logger.LogInformation("Uploaded result file: outputfile"); // me
 
 
                         // logging
 
                         await storageProvider.CommitRequestAsync(request);
+                        //await queueClient.DeleteMessageAsync(LoggerMessage.MessageId, message.PopReceipt);
+                        
 
                         // loggingx
 
@@ -98,6 +115,9 @@ namespace MyCloudProject
                     catch (Exception ex)
                     {
                         // logging
+
+                        logger?.LogError(ex, "TODO ... ");
+
                     }
                 }
                 else

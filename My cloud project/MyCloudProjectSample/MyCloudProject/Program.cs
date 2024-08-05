@@ -48,6 +48,7 @@ namespace MyCloudProject
 
             logger?.LogInformation($"{DateTime.Now} - Started experiment: Implement the Spatial Pooler SDR Reconstruction.");
 
+
             IStorageProvider storageProvider = new AzureStorageProvider(cfgSec);
 
             IExperiment experiment = new Experiment(cfgSec, storageProvider, logger/* put some additional config here */);
@@ -74,7 +75,6 @@ namespace MyCloudProject
                         logger.LogInformation($"Downloaded input file to: {localFileWithInputArgs}");
 
                         // Checking the content and existence of the downloaded file
-
                         if (File.Exists(localFileWithInputArgs))
                         {
                             logger.LogInformation($"File {localFileWithInputArgs} exists. Checking content...");

@@ -37,19 +37,24 @@ namespace MyCloudProject
             Console.WriteLine($"Started experiment: Implement the Spatial Pooler SDR Reconstruction.");
 
             // Init configuration
-            var cfgRoot = Common.InitHelpers.InitConfiguration(args);
+            var builder = new ConfigurationBuilder()
+            .AddJsonFile("appsettings.json", optional: false, reloadOnChange: true);
 
+            var cfgRoot = builder.Build();
             var cfgSec = cfgRoot.GetSection("MyConfig");
 
+
             // InitLogging
+
             var logFactory = InitHelpers.InitLogging(cfgRoot);
-          
-            var logger = logFactory.CreateLogger("Train.Console");
 
-            logger?.LogInformation($"{DateTime.Now} - Started experiment: Implement the Spatial Pooler SDR Reconstruction.");
+            //var logger = logFactory.CreateLogger("Train.Console");
 
+            //logger?.LogInformation($"{DateTime.Now} - Started experiment: Implement the Spatial Pooler SDR Reconstruction.");
 
-            IStorageProvider storageProvider = new AzureStorageProvider(cfgSec);
+            var logger = logFactory.CreateLogger<AzureStorageProvider>(); // Ensure logger is created for AzureStorageProvider
+            MyExperiment.IStorageProvider storageProvider = new MyExperiment.AzureStorageProvider(cfgRoot, logger);
+
 
             IExperiment experiment = new Experiment(cfgSec, storageProvider, logger/* put some additional config here */);
 
@@ -58,7 +63,7 @@ namespace MyCloudProject
             while (tokeSrc.Token.IsCancellationRequested == false)
             {
                 // Step 3
-                IExerimentRequest request = storageProvider.ReceiveExperimentRequestAsync(tokeSrc.Token);
+                IExperimentRequest request = await storageProvider.ReceiveExperimentRequestAsync(tokeSrc.Token);
 
                 if (request != null)
                 {
@@ -69,9 +74,17 @@ namespace MyCloudProject
 
                         // Step 4.
 
+                        if (string.IsNullOrEmpty(request.InputFile))
+                        {
+                            logger.LogError("Input file is null or empty.");
+                            return;
+                        }
+
                         logger.LogInformation($"Starting download of input file: {request.InputFile}");
 
                         var localFileWithInputArgs = await storageProvider.DownloadInputAsync(request.InputFile);
+
+
                         logger.LogInformation($"Downloaded input file to: {localFileWithInputArgs}");
 
                         // Checking the content and existence of the downloaded file
@@ -79,6 +92,7 @@ namespace MyCloudProject
                         {
                             logger.LogInformation($"File {localFileWithInputArgs} exists. Checking content...");
                             string fileContent = await File.ReadAllTextAsync(localFileWithInputArgs);
+                            
                             logger.LogInformation($"Content of {localFileWithInputArgs}: {fileContent.Substring(0, Math.Min(fileContent.Length, 100))}..."); // نمایش 100 کاراکتر اول
                         }
                         else
@@ -97,8 +111,7 @@ namespace MyCloudProject
                         // logging
 
                         // Step 5.
-                        await storageProvider.UploadResultAsync("outputfile", result);
-
+                        await storageProvider.UploadResultAsync(request.InputFile, result);
 
                         // logging
 
@@ -108,7 +121,7 @@ namespace MyCloudProject
 
                         // loggingx
 
-                        logger.LogInformation("Committed request.");  // me
+                        logger.LogInformation("Committed request.");  
 
 
                     }
@@ -116,8 +129,7 @@ namespace MyCloudProject
                     {
                         // logging
 
-                        logger?.LogError(ex, "TODO ... ");
-
+                        logger.LogError(ex, "Error occurred during processing.");
                     }
                 }
                 else

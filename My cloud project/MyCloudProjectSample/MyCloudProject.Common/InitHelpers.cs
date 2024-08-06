@@ -3,7 +3,6 @@ using Microsoft.Extensions.Configuration;
 using System;
 using Microsoft.Extensions.Logging.Console;
 using System.Threading;
-
 using System.Threading.Tasks;
 using System.Runtime.CompilerServices;
 
@@ -18,17 +17,20 @@ namespace MyCloudProject.Common
         /// <returns></returns>
         public static ILoggerFactory InitLogging(IConfigurationRoot configRoot)
         {
+
+
+
             //create logger from the appsettings addConsole Debug to Logg 
             return LoggerFactory.Create(logBuilder =>
             {
-                ConsoleLoggerOptions logCfg = new ConsoleLoggerOptions();
-
                 logBuilder.AddConfiguration(configRoot.GetSection("Logging"));
-
-                logBuilder.AddConsole((opts) =>
+                logBuilder.AddConsole(options =>
                 {
-                    opts.IncludeScopes = true;
-                }).AddDebug();
+                    options.IncludeScopes = true;
+                });
+                logBuilder.AddDebug();
+
+
             });
         }
 

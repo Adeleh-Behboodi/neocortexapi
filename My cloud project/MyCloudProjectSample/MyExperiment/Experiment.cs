@@ -15,6 +15,19 @@ namespace MyExperiment
     /// <summary>
     /// This class implements the ML experiment that will run in the cloud. This is refactored code from my SE project.
     /// </summary>
+    public class ExperimentRequest : IExperimentRequest
+    {
+        public string InputFile { get; set; }
+      
+    }
+
+    public interface IExperimentRequest
+    {
+        public string InputFile { get; set; }
+    }
+
+
+
     public class Experiment : IExperiment
     {
         private IStorageProvider storageProvider;

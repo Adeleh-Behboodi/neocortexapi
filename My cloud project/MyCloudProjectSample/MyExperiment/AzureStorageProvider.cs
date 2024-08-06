@@ -2,6 +2,7 @@
 using Azure.Data.Tables;
 using Azure.Storage.Blobs;
 using Azure.Storage.Queues;
+using Azure.Storage.Queues.Models;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using MyCloudProject.Common;
@@ -15,44 +16,168 @@ using System.Threading.Tasks;
 
 namespace MyExperiment
 {
+
+
+    public interface IStorageProvider
+    {
+        Task CommitRequestAsync(IExperimentRequest request);
+        Task<string> DownloadInputAsync(string fileName);
+        Task<IExperimentRequest> ReceiveExperimentRequestAsync(CancellationToken token);
+        Task UploadResultAsync(string experimentName, IExperimentResult result);
+
+    }
+
+
+
     public class AzureStorageProvider : IStorageProvider
     {
-        private MyConfig _config;
+        private readonly MyConfig _config;
+        private readonly BlobServiceClient _blobServiceClient;
+        private readonly QueueClient _queueClient;
+        private readonly ILogger<AzureStorageProvider> _logger;
 
-        public AzureStorageProvider(IConfigurationSection configSection)
+
+        public AzureStorageProvider(IConfiguration configuration, ILogger<AzureStorageProvider> logger)
         {
             _config = new MyConfig();
-            configSection.Bind(_config);
+            configuration.GetSection("MyConfig").Bind(_config);
+
+            var blobConnectionString = configuration.GetValue<string>("AzureBlobStorageConnectionString");
+
+            if (string.IsNullOrEmpty(blobConnectionString))
+            {
+                // If logger is not assigned yet, it might be null, ensure proper error handling
+                logger?.LogError("Blob connection string is null or empty.");
+                throw new ArgumentException("Blob connection string is required.");
+            }
+
+            _blobServiceClient = new BlobServiceClient(blobConnectionString);
+
+            var queueConnectionString = configuration.GetValue<string>("AzureQueueStorageConnectionString");
+            var queueName = configuration.GetValue<string>("AzureQueueName");
+            _queueClient = new QueueClient(queueConnectionString, queueName);
+
+            _logger = logger ?? throw new ArgumentNullException(nameof(logger));
+
+
+
         }
 
-        public Task CommitRequestAsync(IExerimentRequest request)
+
+
+
+
+        public Task CommitRequestAsync(IExperimentRequest request)
         {
             throw new NotImplementedException();
+
         }
+
 
         public async Task<string> DownloadInputAsync(string fileName)
         {
-            BlobContainerClient container = new BlobContainerClient("Read from config","sample-file");
+            try
+            {
+                var container = _blobServiceClient.GetBlobContainerClient("blobcontainersub4");
+                await container.CreateIfNotExistsAsync();
 
-            await container.CreateIfNotExistsAsync();
+                var blob = container.GetBlobClient(fileName);
 
-            BlobClient blob = container.GetBlobClient(fileName);
-            
-            
-            throw new NotImplementedException();
+                if (await blob.ExistsAsync())
+                {
+                    var downloadResponse = await blob.DownloadAsync();
+                    var localFilePath = Path.Combine(Path.GetTempPath(), fileName);
+
+                    using (var fileStream = File.OpenWrite(localFilePath))
+                    {
+                        await downloadResponse.Value.Content.CopyToAsync(fileStream);
+                    }
+
+                    _logger.LogInformation($"File downloaded to: {localFilePath}");
+                    return localFilePath;
+                }
+                else
+                {
+                    _logger.LogWarning($"Blob {fileName} does not exist in container.");
+                    return null;
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error occurred while downloading blob.");
+                throw;
+
+            }
         }
 
+    //}
 
 
+        public async Task<IExperimentRequest> ReceiveExperimentRequestAsync(CancellationToken token)
 
-
-
-        public IExerimentRequest ReceiveExperimentRequestAsync(CancellationToken token)
         {
-            // Receive the message and make sure that it is serialized to IExperimentResult.
-            throw new NotImplementedException();
+            _logger.LogInformation("Receiving experiment request from the queue.");
+
+            QueueMessage[] messages = await _queueClient.ReceiveMessagesAsync(maxMessages: 1, visibilityTimeout: TimeSpan.FromMinutes(1), cancellationToken: token);
+
+            if (messages.Length == 0)
+            {
+                _logger.LogInformation("No messages found in the queue.");
+                return null;
+            }
+
+            var message = messages[0];
+            var messageText = message.MessageText;
+
+            _logger.LogInformation($"Received message: {messageText}");
+
+            try
+            {
+                var experimentRequest = JsonSerializer.Deserialize<IExperimentRequest>(messageText);
+
+
+                await _queueClient.DeleteMessageAsync(message.MessageId, message.PopReceipt, token);
+
+                _logger.LogInformation("Message processed and deleted from the queue.");
+                return experimentRequest;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error processing message from queue.");
+                throw;
+
+
+            }
         }
 
+
+
+
+        public async Task UploadResultAsync(string experimentName, IExperimentResult result)
+        {
+            var containerName = "outputfile";
+
+            _logger.LogInformation($"Uploading result to container: {containerName}");
+
+            var blobContainerClient = _blobServiceClient.GetBlobContainerClient(containerName);
+            await blobContainerClient.CreateIfNotExistsAsync();
+
+            var blobName = $"{experimentName}_{DateTime.Now:yyyyMMddHHmmss}.json";
+            _logger.LogInformation($"Blob name: {blobName}");
+
+            var blobClient = blobContainerClient.GetBlobClient(blobName);
+
+            var json = JsonSerializer.Serialize(result);
+            using (var stream = new MemoryStream(Encoding.UTF8.GetBytes(json)))
+            {
+                await blobClient.UploadAsync(stream, overwrite: true);
+            }
+
+            _logger.LogInformation($"Uploaded result to blob: {blobClient.Uri}");
+
+
+
+        }
 
         public Task UploadExperimentResult(IExperimentResult result)
         {
@@ -60,53 +185,6 @@ namespace MyExperiment
         }
 
 
-        private readonly BlobServiceClient _blobServiceClient;
-        private readonly ILogger<AzureStorageProvider> _logger;
-
-
-        public AzureStorageProvider(IConfiguration configuration, ILogger<AzureStorageProvider> logger)
-        
-        {
-            // Initial setting BlobServiceClient
-            var connectionString = configuration.GetValue<string>("AzureBlobStorageConnectionString");
-            _blobServiceClient = new BlobServiceClient(connectionString);
-            _logger = logger;
-        }
-
-
-        public async Task UploadResultAsync(string experimentName, IExperimentResult result)
-        {
-
-            // Name of container
-            var containerName = "outputfile";
-
-            _logger.LogInformation($"Uploading result to container: {containerName}");
-
-            // Create a BlobContainerClient for the specified container
-            var blobContainerClient = _blobServiceClient.GetBlobContainerClient(containerName);
-
-            // Create the container if it does not already exist
-            await blobContainerClient.CreateIfNotExistsAsync();
-
-            // Generate the output file name using the experiment name and current time
-            var blobName = $"{experimentName}_{DateTime.Now:yyyyMMddHHmmss}.json";
-            _logger.LogInformation($"Blob name: {blobName}");
-
-
-            var blobClient = blobContainerClient.GetBlobClient(blobName);
-
-            // Serialize the result to JSON
-            var json = JsonSerializer.Serialize(result);
-            using (var stream = new MemoryStream(Encoding.UTF8.GetBytes(json)))
-            {
-                // Upload the file to Blob Storage
-                await blobClient.UploadAsync(stream, overwrite: true);
-            }
-
-            _logger.LogInformation($"Uploaded result to blob: {blobClient.Uri}");
-
-
-        }
     }
 
 

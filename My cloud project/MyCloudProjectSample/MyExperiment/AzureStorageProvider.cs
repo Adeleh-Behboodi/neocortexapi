@@ -44,7 +44,15 @@ namespace MyExperiment
 
             var blobConnectionString = configuration.GetValue<string>("AzureBlobStorageConnectionString");
 
-            if (string.IsNullOrEmpty(blobConnectionString))
+            Console.WriteLine($"Blob Connection String: {blobConnectionString}"); // To test the connection string value
+            var queueConnectionString = configuration.GetValue<string>("AzureQueueStorageConnectionString");
+            var queueName = configuration.GetValue<string>("AzureQueueName");
+            Console.WriteLine($"Queue Connection String: {queueConnectionString}");
+            Console.WriteLine($"Queue Name: {queueName}");
+
+
+
+            if (string.IsNullOrEmpty(blobConnectionString) || string.IsNullOrEmpty(queueConnectionString) || string.IsNullOrEmpty(queueName))
             {
                 // If logger is not assigned yet, it might be null, ensure proper error handling
                 logger?.LogError("Blob connection string is null or empty.");
@@ -52,25 +60,15 @@ namespace MyExperiment
             }
 
             _blobServiceClient = new BlobServiceClient(blobConnectionString);
-
-            var queueConnectionString = configuration.GetValue<string>("AzureQueueStorageConnectionString");
-            var queueName = configuration.GetValue<string>("AzureQueueName");
             _queueClient = new QueueClient(queueConnectionString, queueName);
-
             _logger = logger ?? throw new ArgumentNullException(nameof(logger));
 
-
-
         }
-
-
-
 
 
         public Task CommitRequestAsync(IExperimentRequest request)
         {
             throw new NotImplementedException();
-
         }
 
 
@@ -78,7 +76,7 @@ namespace MyExperiment
         {
             try
             {
-                var container = _blobServiceClient.GetBlobContainerClient("blobcontainersub4");
+                var container = _blobServiceClient.GetBlobContainerClient("containersub4");
                 await container.CreateIfNotExistsAsync();
 
                 var blob = container.GetBlobClient(fileName);
@@ -109,8 +107,6 @@ namespace MyExperiment
 
             }
         }
-
-    //}
 
 
         public async Task<IExperimentRequest> ReceiveExperimentRequestAsync(CancellationToken token)
@@ -155,7 +151,8 @@ namespace MyExperiment
 
         public async Task UploadResultAsync(string experimentName, IExperimentResult result)
         {
-            var containerName = "outputfile";
+            //var containerName = "outputfile";
+            var containerName = "containersub4";
 
             _logger.LogInformation($"Uploading result to container: {containerName}");
 

@@ -17,9 +17,6 @@ namespace MyCloudProject.Common
         /// <returns></returns>
         public static ILoggerFactory InitLogging(IConfigurationRoot configRoot)
         {
-
-
-
             //create logger from the appsettings addConsole Debug to Logg 
             return LoggerFactory.Create(logBuilder =>
             {
@@ -29,8 +26,6 @@ namespace MyCloudProject.Common
                     options.IncludeScopes = true;
                 });
                 logBuilder.AddDebug();
-
-
             });
         }
 
@@ -58,14 +53,8 @@ namespace MyCloudProject.Common
             builder.AddEnvironmentVariables();
 
             var configRoot = builder.Build();
-
-           
+            
             return configRoot;
         }
-
-    
-
-
-     
     }
 }

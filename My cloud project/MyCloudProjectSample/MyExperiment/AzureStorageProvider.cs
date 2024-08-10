@@ -26,6 +26,12 @@ namespace MyExperiment
     }
 
 
+
+
+
+
+
+
     public class AzureStorageProvider : IStorageProvider
     {
         private readonly MyConfig _config;
@@ -63,13 +69,15 @@ namespace MyExperiment
         }
 
 
-        public Task CommitRequestAsync(IExperimentRequest request)
+        public async Task CommitRequestAsync(IExperimentRequest request)
+
         {
-            throw new NotImplementedException();
+            _logger.LogInformation("Request committed.");
+            await Task.CompletedTask; // for showing the end of method
         }
 
 
-        public async Task<string> DownloadInputAsync(string fileName)
+            public async Task<string> DownloadInputAsync(string fileName)
         {
             try
             {
@@ -109,75 +117,79 @@ namespace MyExperiment
         {
             _logger.LogInformation("Receiving experiment request from the queue.");
 
-            QueueMessage[] messages = await _queueClient.ReceiveMessagesAsync(maxMessages: 1, visibilityTimeout: TimeSpan.FromMinutes(1), cancellationToken: token);
-
-
-            if (messages.Length == 0)
+            while (!token.IsCancellationRequested)
             {
-                _logger.LogInformation("No messages found in the queue.");
-                return null;
-            }
+                QueueMessage[] messages = await _queueClient.ReceiveMessagesAsync(maxMessages: 1, visibilityTimeout: TimeSpan.FromMinutes(1), cancellationToken: token);
 
-            var message = messages[0];
-
-            string jsonMessage;
-
-
-            try
-            {
-                jsonMessage = Encoding.UTF8.GetString(Convert.FromBase64String(message.MessageText));
-            }
-            catch (FormatException ex)
-            {
-                _logger.LogError(ex, "Failed to decode Base64 message.");
-                await _queueClient.DeleteMessageAsync(message.MessageId, message.PopReceipt, token);
-                return null;
-            }
-
-
-
-
-
-            _logger.LogInformation($"Received message: {jsonMessage}");
-
-            if (!jsonMessage.Trim().StartsWith("{"))
-            {
-                _logger.LogError("Received an invalid JSON message.");
-                await _queueClient.DeleteMessageAsync(message.MessageId, message.PopReceipt, token);
-                return null;
-            }
-
-            try
-            {
-                IExperimentRequest experimentRequest = JsonSerializer.Deserialize<ExperimentRequest>(jsonMessage);
-
-                if (experimentRequest == null)
-
-
+                if (messages.Length == 0)
                 {
-                    _logger.LogError("Failed to cast ExperimentRequest to IExperimentRequest.");
+                    _logger.LogInformation("No messages found in the queue.");
+                    await Task.Delay(1000); // One second delay
+                    continue; // return to the loop to get the next message
+                }
+
+                var message = messages[0];
+                string jsonMessage;
+
+
+                try
+                {
+                    jsonMessage = Encoding.UTF8.GetString(Convert.FromBase64String(message.MessageText));
+
+
+                }
+                catch (FormatException ex)
+                {
+                    _logger.LogError(ex, "Failed to decode Base64 message.");
+                    await _queueClient.DeleteMessageAsync(message.MessageId, message.PopReceipt, token);
+                    continue; // Continue to next message
+                    
+                    // return null;
+                }
+
+                _logger.LogInformation($"Received message: {jsonMessage}");
+
+                if (!jsonMessage.Trim().StartsWith("{"))
+                {
+                    _logger.LogError("Received an invalid JSON message.");
+                    await _queueClient.DeleteMessageAsync(message.MessageId, message.PopReceipt, token);
+                    continue; // Return to the loop to get the next message
+                }
+
+                try
+                {
+                    IExperimentRequest experimentRequest = JsonSerializer.Deserialize<ExperimentRequest>(jsonMessage);
+
+
+                    if (experimentRequest == null)
+                    {
+                        _logger.LogError("Failed to cast ExperimentRequest to IExperimentRequest.");
+                        await _queueClient.DeleteMessageAsync(message.MessageId, message.PopReceipt, token);
+                        return null;
+                    }
+
+                    await _queueClient.DeleteMessageAsync(message.MessageId, message.PopReceipt, token);
+                    _logger.LogInformation("Message processed and deleted from the queue.");
+                    return experimentRequest;
+                }
+
+
+
+                catch (JsonException ex)
+                {
+                    _logger.LogError(ex, $"Failed to deserialize message: {jsonMessage}");
                     await _queueClient.DeleteMessageAsync(message.MessageId, message.PopReceipt, token);
                     return null;
                 }
+                catch (Exception ex)
+                {
+                    _logger.LogError(ex, "Error processing message from queue.");
+                    throw;
+                }
 
-                await _queueClient.DeleteMessageAsync(message.MessageId, message.PopReceipt, token);
-                _logger.LogInformation("Message processed and deleted from the queue.");
-                return experimentRequest;
             }
-            catch (JsonException ex)
-            {
-                _logger.LogError(ex, $"Failed to deserialize message: {jsonMessage}");
-                await _queueClient.DeleteMessageAsync(message.MessageId, message.PopReceipt, token);
-                return null;
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Error processing message from queue.");
-                
-                throw;
-            }
-
-            throw new NotImplementedException();
+            // Return null if no valid message was processed
+            return null;
 
         }
 
@@ -200,6 +212,10 @@ namespace MyExperiment
 
             var json = JsonSerializer.Serialize(result);
             using (var stream = new MemoryStream(Encoding.UTF8.GetBytes(json)))
+            
+            
+            
+            
             {
                 await blobClient.UploadAsync(stream, overwrite: true);
             }
@@ -214,5 +230,84 @@ namespace MyExperiment
         {
             throw new NotImplementedException();
         }
-    }
+
+        public async Task ProcessQueueAsync(CancellationToken token)
+        {
+            int emptyMessageCount = 0;
+            const int maxEmptyMessages = 3; // حداکثر تعداد پیام‌های خالی قبل از توقف پردازش
+
+            while (!token.IsCancellationRequested)
+            {
+                var message = await ReceiveExperimentRequestAsync(token);
+
+                if (message == null)
+                {
+                    emptyMessageCount++;
+                    if (emptyMessageCount >= maxEmptyMessages)
+                    {
+                        _logger.LogInformation("No more messages in the queue. Stopping process.");
+                        break; // توقف پردازش اگر تعداد مشخصی پیام خالی دریافت شد
+                    }
+                    else
+                    {
+                        _logger.LogInformation("No messages found in the queue.");
+                        await Task.Delay(5000, token); // زمان انتظار برای بررسی دوباره صف
+                        continue;
+                    }
+                }
+
+                emptyMessageCount = 0; // اگر پیام جدیدی دریافت شد، شمارش خالی‌ها را ریست کنید
+
+                // پردازش پیام
+                try
+                {
+                    await ProcessMessageAsync(message);
+                }
+                catch (Exception ex)
+                {
+                    _logger.LogError(ex, "Error processing message.");
+                }
+            }
+        }
+        public class YourExperimentImplementation : IExperiment
+        {
+            public async Task<IExperimentResult> RunAsync(string inputFile)
+            {
+                // پیاده‌سازی منطق آزمایش
+                var result = new ExperimentResult("partitionKey", "experimentId"); // اضافه کردن پارامترهای لازم
+
+                // پردازش داده‌ها و تولید نتیجه
+                return await Task.FromResult(result);
+
+            }
+        }
+
+        private async Task ProcessMessageAsync(IExperimentRequest message)
+        {
+            string inputFile = await DownloadInputAsync(message.InputFile);
+            if (string.IsNullOrEmpty(inputFile))
+            {
+                _logger.LogWarning("Input file not found, skipping message.");
+                return;
+            }
+
+            IExperiment experiment = new YourExperimentImplementation();
+            IExperimentResult result = await experiment.RunAsync(inputFile);
+            if (result != null)
+            {
+                await UploadResultAsync(result.ExperimentId, result);
+            }
+            else
+            {
+                _logger.LogError("Experiment result is null.");
+            }
+
+            await CommitRequestAsync(message);
+
+
+        }
+
+
+
+        }
 }

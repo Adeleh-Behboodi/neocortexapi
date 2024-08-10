@@ -45,6 +45,7 @@ namespace MyCloudProject
             QueueServiceClient queueServiceClient = new QueueServiceClient(connectionString);
             QueueClient queueClient = queueServiceClient.GetQueueClient(queueName);
 
+
             // Make sure the queue exists
             await queueClient.CreateIfNotExistsAsync();
 
@@ -56,8 +57,10 @@ namespace MyCloudProject
             });
 
             // Send the message to the queue
-            await queueClient.SendMessageAsync(Convert.ToBase64String(Encoding.UTF8.GetBytes(messageContent)));
+            await queueClient.SendMessageAsync(messageContent);
+
             Console.WriteLine("Message sent to queue.");
+
         }
 
 
@@ -97,9 +100,15 @@ namespace MyCloudProject
 
             //
             // Implements the step 3 in the architecture picture.
-            while (tokeSrc.Token.IsCancellationRequested == false)
+
+            var maxRetries = 10; // the maximum numbers of attempt
+            var retries = 0;
+
+            while (tokeSrc.Token.IsCancellationRequested == false && retries < maxRetries)
+
             {
-                // Step 3
+
+
                 IExperimentRequest request = await storageProvider.ReceiveExperimentRequestAsync(tokeSrc.Token);
 
                 if (request != null)
@@ -171,11 +180,13 @@ namespace MyCloudProject
                 }
                 else
                 {
-                    await Task.Delay(500);
+                    retries++;
+                    await Task.Delay(1000);
                     logger?.LogTrace("Queue empty...");
                 }
             }
 
+            logger?.LogInformation("Max retries reached or cancellation requested. Exiting loop.");
             logger?.LogInformation($"{DateTime.Now} - Experiment exit: Implement the Spatial Pooler SDR Reconstruction.");
         }
 

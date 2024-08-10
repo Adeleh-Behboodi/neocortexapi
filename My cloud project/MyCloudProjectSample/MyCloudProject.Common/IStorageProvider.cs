@@ -17,7 +17,6 @@ namespace MyCloudProject.Common
         /// <param name="token"></param>
         /// <returns>NULL if there are no messages in the queue.</returns>
         Task<IExerimentRequest> ReceiveExperimentRequestAsync(CancellationToken token);
-
         /// <summary>
         /// Downloads the input file for training. This file contains all required input for the experiment.
         /// The file is stored in the cloud or any other kind of store or database.

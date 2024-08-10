@@ -52,8 +52,10 @@ namespace MyExperiment
 
             // YOU START HERE WITH YOUR SE EXPERIMENT!!!!
 
-            ExperimentResult res = new ExperimentResult(this.config.GroupId, null);
-
+            //ExperimentResult res = new ExperimentResult(this.config.GroupId, null);
+            
+            ExperimentResult res = new ExperimentResult(this.config.GroupId, Guid.NewGuid().ToString());
+            
             // logging, logging and logging
 
             res.StartTimeUtc = DateTime.UtcNow;

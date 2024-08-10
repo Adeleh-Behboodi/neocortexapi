@@ -17,16 +17,13 @@ using System.Threading.Tasks;
 namespace MyExperiment
 {
 
-
     public interface IStorageProvider
     {
         Task CommitRequestAsync(IExperimentRequest request);
         Task<string> DownloadInputAsync(string fileName);
         Task<IExperimentRequest> ReceiveExperimentRequestAsync(CancellationToken token);
         Task UploadResultAsync(string experimentName, IExperimentResult result);
-
     }
-
 
 
     public class AzureStorageProvider : IStorageProvider
@@ -42,27 +39,27 @@ namespace MyExperiment
             _config = new MyConfig();
             configuration.GetSection("MyConfig").Bind(_config);
 
-            var blobConnectionString = configuration.GetValue<string>("AzureBlobStorageConnectionString");
+            var blobConnectionString = configuration.GetValue<string>("MyConfig:AzureBlobStorageConnectionString");
+            var queueConnectionString = configuration.GetValue<string>("MyConfig:AzureQueueStorageConnectionString");
+            var queueName = configuration.GetValue<string>("MyConfig:Queue");
+
 
             Console.WriteLine($"Blob Connection String: {blobConnectionString}"); // To test the connection string value
-            var queueConnectionString = configuration.GetValue<string>("AzureQueueStorageConnectionString");
-            var queueName = configuration.GetValue<string>("AzureQueueName");
             Console.WriteLine($"Queue Connection String: {queueConnectionString}");
             Console.WriteLine($"Queue Name: {queueName}");
 
-
-
             if (string.IsNullOrEmpty(blobConnectionString) || string.IsNullOrEmpty(queueConnectionString) || string.IsNullOrEmpty(queueName))
+
             {
                 // If logger is not assigned yet, it might be null, ensure proper error handling
-                logger?.LogError("Blob connection string is null or empty.");
-                throw new ArgumentException("Blob connection string is required.");
+                logger?.LogError("Blob connection string or Queue connection string or Queue name is null or empty.");
+                throw new ArgumentException("Blob connection string, Queue connection string, or Queue name is required.");
+
             }
 
             _blobServiceClient = new BlobServiceClient(blobConnectionString);
             _queueClient = new QueueClient(queueConnectionString, queueName);
             _logger = logger ?? throw new ArgumentNullException(nameof(logger));
-
         }
 
 
@@ -103,18 +100,17 @@ namespace MyExperiment
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error occurred while downloading blob.");
-                throw;
-
+                throw new NotImplementedException();
             }
         }
 
 
         public async Task<IExperimentRequest> ReceiveExperimentRequestAsync(CancellationToken token)
-
         {
             _logger.LogInformation("Receiving experiment request from the queue.");
 
             QueueMessage[] messages = await _queueClient.ReceiveMessagesAsync(maxMessages: 1, visibilityTimeout: TimeSpan.FromMinutes(1), cancellationToken: token);
+
 
             if (messages.Length == 0)
             {
@@ -123,33 +119,71 @@ namespace MyExperiment
             }
 
             var message = messages[0];
-            var messageText = message.MessageText;
 
-            _logger.LogInformation($"Received message: {messageText}");
+            string jsonMessage;
+
 
             try
             {
-                var experimentRequest = JsonSerializer.Deserialize<IExperimentRequest>(messageText);
+                jsonMessage = Encoding.UTF8.GetString(Convert.FromBase64String(message.MessageText));
+            }
+            catch (FormatException ex)
+            {
+                _logger.LogError(ex, "Failed to decode Base64 message.");
+                await _queueClient.DeleteMessageAsync(message.MessageId, message.PopReceipt, token);
+                return null;
+            }
 
+
+
+
+
+            _logger.LogInformation($"Received message: {jsonMessage}");
+
+            if (!jsonMessage.Trim().StartsWith("{"))
+            {
+                _logger.LogError("Received an invalid JSON message.");
+                await _queueClient.DeleteMessageAsync(message.MessageId, message.PopReceipt, token);
+                return null;
+            }
+
+            try
+            {
+                IExperimentRequest experimentRequest = JsonSerializer.Deserialize<ExperimentRequest>(jsonMessage);
+
+                if (experimentRequest == null)
+
+
+                {
+                    _logger.LogError("Failed to cast ExperimentRequest to IExperimentRequest.");
+                    await _queueClient.DeleteMessageAsync(message.MessageId, message.PopReceipt, token);
+                    return null;
+                }
 
                 await _queueClient.DeleteMessageAsync(message.MessageId, message.PopReceipt, token);
-
                 _logger.LogInformation("Message processed and deleted from the queue.");
                 return experimentRequest;
+            }
+            catch (JsonException ex)
+            {
+                _logger.LogError(ex, $"Failed to deserialize message: {jsonMessage}");
+                await _queueClient.DeleteMessageAsync(message.MessageId, message.PopReceipt, token);
+                return null;
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error processing message from queue.");
+                
                 throw;
-
-
             }
+
+            throw new NotImplementedException();
+
         }
 
-
-
-
         public async Task UploadResultAsync(string experimentName, IExperimentResult result)
+
+
         {
             //var containerName = "outputfile";
             var containerName = "containersub4";
@@ -172,7 +206,7 @@ namespace MyExperiment
 
             _logger.LogInformation($"Uploaded result to blob: {blobClient.Uri}");
 
-
+            //throw new NotImplementedException();
 
         }
 
@@ -180,9 +214,5 @@ namespace MyExperiment
         {
             throw new NotImplementedException();
         }
-
-
     }
-
-
 }

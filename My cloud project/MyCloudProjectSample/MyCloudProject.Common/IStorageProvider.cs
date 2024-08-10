@@ -16,7 +16,7 @@ namespace MyCloudProject.Common
         /// </summary>
         /// <param name="token"></param>
         /// <returns>NULL if there are no messages in the queue.</returns>
-        IExerimentRequest ReceiveExperimentRequestAsync(CancellationToken token);
+        Task<IExerimentRequest> ReceiveExperimentRequestAsync(CancellationToken token);
 
         /// <summary>
         /// Downloads the input file for training. This file contains all required input for the experiment.

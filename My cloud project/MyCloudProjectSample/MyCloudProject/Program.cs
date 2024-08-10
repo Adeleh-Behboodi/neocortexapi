@@ -24,6 +24,43 @@ namespace MyCloudProject
 
         string test;
 
+        private static async Task CreateQueueIfNotExistsAsync()
+        {
+            string connectionString = "DefaultEndpointsProtocol=https;AccountName=blobcontainersub4;AccountKey=Sd9tYA23WeUFrFwhJwmJFxbrd6vz6JqPQw3PkCGrTSxpKmroHPM0SdWJDYMFkncfDnulp/mhWxnL+AStYSZwGA==;EndpointSuffix=core.windows.net";
+            string queueName = "trigger-queue";
+
+            QueueServiceClient queueServiceClient = new QueueServiceClient(connectionString);
+            QueueClient queueClient = queueServiceClient.GetQueueClient(queueName);
+
+            await queueClient.CreateIfNotExistsAsync();
+        }
+
+        // For test trigger-queue
+
+        private static async Task SendMessageToQueueAsync()
+        {
+            string connectionString = "DefaultEndpointsProtocol=https;AccountName=blobcontainersub4;AccountKey=Sd9tYA23WeUFrFwhJwmJFxbrd6vz6JqPQw3PkCGrTSxpKmroHPM0SdWJDYMFkncfDnulp/mhWxnL+AStYSZwGA==;EndpointSuffix=core.windows.net";
+            string queueName = "trigger-queue";
+
+            QueueServiceClient queueServiceClient = new QueueServiceClient(connectionString);
+            QueueClient queueClient = queueServiceClient.GetQueueClient(queueName);
+
+            // Make sure the queue exists
+            await queueClient.CreateIfNotExistsAsync();
+
+            // Create a message
+            string messageContent = JsonSerializer.Serialize(new ExperimentRequest
+            {
+                InputFile = "test-file.txt",
+                // Add other properties if needed
+            });
+
+            // Send the message to the queue
+            await queueClient.SendMessageAsync(Convert.ToBase64String(Encoding.UTF8.GetBytes(messageContent)));
+            Console.WriteLine("Message sent to queue.");
+        }
+
+
         static async Task Main(string[] args)
         {
             CancellationTokenSource tokeSrc = new CancellationTokenSource();
@@ -55,7 +92,7 @@ namespace MyCloudProject
             var logger = logFactory.CreateLogger<AzureStorageProvider>(); // Ensure logger is created for AzureStorageProvider
             MyExperiment.IStorageProvider storageProvider = new MyExperiment.AzureStorageProvider(cfgRoot, logger);
 
-
+            await SendMessageToQueueAsync();
             IExperiment experiment = new Experiment(cfgSec, storageProvider, logger/* put some additional config here */);
 
             //

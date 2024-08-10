@@ -11,6 +11,9 @@ namespace MyExperiment
     public class MyConfig
     {
         public string StorageConnectionString { get; set; }
+        public string AzureBlobStorageConnectionString { get; set; }
+        public string AzureQueueStorageConnectionString { get; set; }
+
 
         /// <summary>
         /// The name of the container in the blob storage, where training files are located.

@@ -35,32 +35,24 @@ namespace MyCloudProject
             await queueClient.CreateIfNotExistsAsync();
         }
 
-        // For test trigger-queue
-
         private static async Task SendMessageToQueueAsync()
         {
             string connectionString = "DefaultEndpointsProtocol=https;AccountName=blobcontainersub4;AccountKey=Sd9tYA23WeUFrFwhJwmJFxbrd6vz6JqPQw3PkCGrTSxpKmroHPM0SdWJDYMFkncfDnulp/mhWxnL+AStYSZwGA==;EndpointSuffix=core.windows.net";
             string queueName = "trigger-queue";
 
             QueueServiceClient queueServiceClient = new QueueServiceClient(connectionString);
-            QueueClient queueClient = queueServiceClient.GetQueueClient(queueName);
+            QueueClient queueClient = queueServiceClient.GetQueueClient(queueName); await queueClient.CreateIfNotExistsAsync();
 
-
-            // Make sure the queue exists
             await queueClient.CreateIfNotExistsAsync();
 
-            // Create a message
             string messageContent = JsonSerializer.Serialize(new ExperimentRequest
             {
-                InputFile = "test-file.txt",
-                // Add other properties if needed
+                InputFile = "test-file.png",
             });
 
-            // Send the message to the queue
-            await queueClient.SendMessageAsync(messageContent);
-
+            var base64Message = Convert.ToBase64String(Encoding.UTF8.GetBytes(messageContent));
+            await queueClient.SendMessageAsync(base64Message); 
             Console.WriteLine("Message sent to queue.");
-
         }
 
 
@@ -88,17 +80,12 @@ namespace MyCloudProject
 
             var logFactory = InitHelpers.InitLogging(cfgRoot);
 
-            //var logger = logFactory.CreateLogger("Train.Console");
-
-            //logger?.LogInformation($"{DateTime.Now} - Started experiment: Implement the Spatial Pooler SDR Reconstruction.");
-
             var logger = logFactory.CreateLogger<AzureStorageProvider>(); // Ensure logger is created for AzureStorageProvider
             MyExperiment.IStorageProvider storageProvider = new MyExperiment.AzureStorageProvider(cfgRoot, logger);
 
             await SendMessageToQueueAsync();
             IExperiment experiment = new Experiment(cfgSec, storageProvider, logger/* put some additional config here */);
 
-            //
             // Implements the step 3 in the architecture picture.
 
             var maxRetries = 10; // the maximum numbers of attempt
@@ -138,14 +125,13 @@ namespace MyCloudProject
                         {
                             logger.LogInformation($"File {localFileWithInputArgs} exists. Checking content...");
                             string fileContent = await File.ReadAllTextAsync(localFileWithInputArgs);
-                            
+
                             logger.LogInformation($"Content of {localFileWithInputArgs}: {fileContent.Substring(0, Math.Min(fileContent.Length, 100))}..."); // نمایش 100 کاراکتر اول
                         }
                         else
                         {
                             logger.LogError($"File {localFileWithInputArgs} does not exist.");
                         }
-
 
 
                         // logging
@@ -163,12 +149,10 @@ namespace MyCloudProject
 
                         await storageProvider.CommitRequestAsync(request);
                         //await queueClient.DeleteMessageAsync(LoggerMessage.MessageId, message.PopReceipt);
-                        
 
                         // loggingx
 
-                        logger.LogInformation("Committed request.");  
-
+                        logger.LogInformation("Committed request.");
 
                     }
                     catch (Exception ex)
@@ -189,7 +173,5 @@ namespace MyCloudProject
             logger?.LogInformation("Max retries reached or cancellation requested. Exiting loop.");
             logger?.LogInformation($"{DateTime.Now} - Experiment exit: Implement the Spatial Pooler SDR Reconstruction.");
         }
-
-
     }
 }

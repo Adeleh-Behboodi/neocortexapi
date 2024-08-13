@@ -13,7 +13,6 @@ namespace MyExperiment
         public string StorageConnectionString { get; set; }
         public string AzureBlobStorageConnectionString { get; set; }
         public string AzureQueueStorageConnectionString { get; set; }
-
         public string AzureTableStorageConnectionString { get; set; }
 
         /// <summary>
@@ -43,5 +42,3 @@ namespace MyExperiment
 
     }
 }
-
-

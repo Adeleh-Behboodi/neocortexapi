@@ -7,15 +7,11 @@ using System.Threading.Tasks;
 
 namespace MyCloudProject.Common
 {
-
-
-
     /// <summary>
     /// Defines the interface for experiment.
     /// </summary>
     public interface IExperiment
     {
-
         /// <summary>
         /// Runs the experiment.
         /// </summary>

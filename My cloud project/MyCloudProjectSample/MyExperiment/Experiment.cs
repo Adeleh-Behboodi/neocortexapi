@@ -15,19 +15,6 @@ namespace MyExperiment
     /// <summary>
     /// This class implements the ML experiment that will run in the cloud. This is refactored code from my SE project.
     /// </summary>
-    public class ExperimentRequest : IExperimentRequest
-    {
-        public string InputFile { get; set; }
-      
-    }
-
-    public interface IExperimentRequest
-    {
-        public string InputFile { get; set; }
-    }
-
-
-
     public class Experiment : IExperiment
     {
         private IStorageProvider storageProvider;
@@ -35,6 +22,8 @@ namespace MyExperiment
         private ILogger logger;
 
         private MyConfig config;
+
+        private readonly ILogger<Experiment> _logger;
 
         public Experiment(IConfigurationSection configSection, IStorageProvider storageProvider, ILogger log)
         {
@@ -52,10 +41,8 @@ namespace MyExperiment
 
             // YOU START HERE WITH YOUR SE EXPERIMENT!!!!
 
-            //ExperimentResult res = new ExperimentResult(this.config.GroupId, null);
-            
-            ExperimentResult res = new ExperimentResult(this.config.GroupId, Guid.NewGuid().ToString());
-            
+            ExperimentResult res = new ExperimentResult(this.config.GroupId, null);
+
             // logging, logging and logging
 
             res.StartTimeUtc = DateTime.UtcNow;
@@ -64,8 +51,5 @@ namespace MyExperiment
 
             return Task.FromResult<IExperimentResult>(res); // TODO...
         }
-
-
     }
 }
-

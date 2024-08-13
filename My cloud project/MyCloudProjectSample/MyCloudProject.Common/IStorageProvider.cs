@@ -16,7 +16,8 @@ namespace MyCloudProject.Common
         /// </summary>
         /// <param name="token"></param>
         /// <returns>NULL if there are no messages in the queue.</returns>
-        Task<IExerimentRequest> ReceiveExperimentRequestAsync(CancellationToken token);
+        ExerimentRequest ReceiveExperimentRequestAsync(CancellationToken token);
+
         /// <summary>
         /// Downloads the input file for training. This file contains all required input for the experiment.
         /// The file is stored in the cloud or any other kind of store or database.
@@ -24,10 +25,7 @@ namespace MyCloudProject.Common
         /// <param name="fileName">The name of the file at some remote (cloud) location from where the file will be downloaded.</param>
         /// <returns>The fullpath name of the file as downloaded locally.</returns>
         /// <remarks>See step 4 in the architecture picture.</remarks>
-        
         Task<string> DownloadInputAsync(string fileName);
-        Task<string> DownloadRandomPngAsync();
-
 
         /// <summary>
         /// Uploads the result of the experiment in the cloud or any other kind of store or database.
@@ -42,7 +40,7 @@ namespace MyCloudProject.Common
         /// </summary>
         /// <param name="request">The requests received by <see cref="nameof(IStorageProvider.ReceiveExperimentRequestAsync)"/>.</param>
         /// <returns></returns>
-        Task CommitRequestAsync(IExerimentRequest request);
+        Task CommitRequestAsync(ExerimentRequest request);
 
     }
 }

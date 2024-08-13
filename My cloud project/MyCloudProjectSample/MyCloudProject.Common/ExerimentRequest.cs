@@ -7,13 +7,11 @@ namespace MyCloudProject.Common
     /// <summary>
     /// Defines the contract for the message request that will run your experiment.
     /// </summary>
-    public interface IExerimentRequest
+    public interface ExerimentRequest
     {
         /// <summary>
         /// Any identifier of yout choice.
         /// </summary>
-        
-
         public string ExperimentId { get; set; }
 
         /// <summary>
@@ -26,6 +24,8 @@ namespace MyCloudProject.Common
         public string Description { get; set; }
 
         public string MessageId { get; set; }
+
+        public string FileContentBase64 { get; set; }
 
         public string MessageReceipt { get; set; }
     }

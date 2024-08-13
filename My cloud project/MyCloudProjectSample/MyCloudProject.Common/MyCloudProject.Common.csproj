@@ -6,6 +6,8 @@
 
   <ItemGroup>
 
+    <PackageReference Include="Azure.Storage.Queues" Version="12.18.0" />
+
     <PackageReference Include="Microsoft.Extensions.Configuration.Abstractions" Version="8.0.0" />
     <PackageReference Include="Microsoft.Extensions.Configuration.CommandLine" Version="8.0.0" />
     <PackageReference Include="Microsoft.Extensions.Configuration.EnvironmentVariables" Version="8.0.0" />

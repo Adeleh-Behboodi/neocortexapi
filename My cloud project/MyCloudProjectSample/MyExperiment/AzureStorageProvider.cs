@@ -6,9 +6,11 @@ using Azure.Storage.Queues.Models;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using MyCloudProject.Common;
+using MyExperiment.MyExperiment;
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Text;
 using System.Text.Json;
 using System.Text.RegularExpressions;
@@ -30,7 +32,7 @@ namespace MyExperiment
         /// Commits the experiment request to the storage.
         /// </summary>
         /// <param name="request">The experiment request to commit.</param>
-        Task CommitRequestAsync(IExperimentRequest request);
+        Task CommitRequestAsync(ExerimentRequest request);
 
         /// <summary>
         /// Downloads an input file from the blob storage.
@@ -45,7 +47,7 @@ namespace MyExperiment
         /// </summary>
         /// <param name="token">Cancellation token to stop the operation.</param>
         /// <returns>Returns an experiment request if found, otherwise null.</returns>
-        Task<IExperimentRequest> ReceiveExperimentRequestAsync(CancellationToken token);
+        Task<ExerimentRequest> ReceiveExperimentRequestAsync(CancellationToken token);
 
         /// <summary>
         /// Uploads the experiment result to the blob storage and stores it in a table.
@@ -68,6 +70,7 @@ namespace MyExperiment
         private readonly BlobServiceClient _blobServiceClient;
         private readonly QueueClient _queueClient;
         private readonly ILogger<AzureStorageProvider> _logger;
+        private readonly IConfiguration _configuration;
 
 
         /// <summary>
@@ -77,17 +80,17 @@ namespace MyExperiment
         /// <param name="logger">Logger for logging operations and errors.</param>
         public AzureStorageProvider(IConfiguration configuration, ILogger<AzureStorageProvider> logger)
         {
-            _config = new MyConfig();
+            _configuration = configuration;
             configuration.GetSection("MyConfig").Bind(_config);
 
-            var blobConnectionString = configuration.GetValue<string>("MyConfig:AzureBlobStorageConnectionString");
-            var queueConnectionString = configuration.GetValue<string>("MyConfig:AzureQueueStorageConnectionString");
-            var queueName = configuration.GetValue<string>("MyConfig:Queue");
+            var blobConnectionString = configuration.GetValue<string>("AzureBlobStorageConnectionString").ToString();
+            var queueConnectionString = configuration.GetValue<string>("AzureQueueStorageConnectionString").ToString();
+            //var queueConnectionString = configuration.GetValue<string>("MyConfig:AzureQueueStorageConnectionString");
+            var queueName = configuration.GetValue<string>("Queue").ToString();
 
-
-            Console.WriteLine($"Blob Connection String: {blobConnectionString}"); 
-            Console.WriteLine($"Queue Connection String: {queueConnectionString}");
-            Console.WriteLine($"Queue Name: {queueName}");
+            //Console.WriteLine($"Blob Connection String: {blobConnectionString}");
+            //Console.WriteLine($"Queue Connection String: {queueConnectionString}");
+            //Console.WriteLine($"Queue Name: {queueName}");
 
             if (string.IsNullOrEmpty(blobConnectionString) || string.IsNullOrEmpty(queueConnectionString) || string.IsNullOrEmpty(queueName))
 
@@ -101,29 +104,6 @@ namespace MyExperiment
             _blobServiceClient = new BlobServiceClient(blobConnectionString);
             _queueClient = new QueueClient(queueConnectionString, queueName);
             _logger = logger ?? throw new ArgumentNullException(nameof(logger));
-        }
-
-        /// <summary>
-        /// Saves the experiment result to Azure Table Storage.
-        /// </summary>
-        /// <param name="partitionKey">Partition key for the table entity.</param>
-        /// <param name="result">Experiment result to save.</param>
-        public async Task SaveResultToTableAsync(string partitionKey, IExperimentResult result)
-        {
-            var tableName = "experimentresults";
-            var tableClient = new TableClient(_config.AzureTableStorageConnectionString, tableName);
-            
-            await tableClient.CreateIfNotExistsAsync();
-
-            var entity = new ExperimentEntity
-            {
-                PartitionKey = partitionKey,
-                RowKey = Guid.NewGuid().ToString(),  // Unique identifier for the row
-                ResultJson = JsonSerializer.Serialize(result)
-            };
-
-            await tableClient.AddEntityAsync(entity);
-            _logger.LogInformation($"Result saved to table with PartitionKey: {partitionKey}.");
         }
 
         /// <summary>
@@ -148,11 +128,40 @@ namespace MyExperiment
             }
         }
 
+
+        /// <summary>
+        /// Saves the experiment result to Azure Table Storage.
+        /// </summary>
+        /// <param name="partitionKey">Partition key for the table entity.</param>
+        /// <param name="result">Experiment result to save.</param>
+        public async Task SaveResultToTableAsync(string partitionKey, IExperimentResult result)
+        {
+            var tableName = _config.ResultTable;
+            var tableClient = new TableClient(_config.AzureTableStorageConnectionString, tableName);
+
+            await tableClient.CreateIfNotExistsAsync();
+
+            var entity = new ExperimentEntity
+            {
+                PartitionKey = partitionKey,
+                RowKey = Guid.NewGuid().ToString(),
+                ResultJson = JsonSerializer.Serialize(result)
+            };
+
+            await tableClient.AddEntityAsync(entity);
+            _logger.LogInformation($"Result saved to table with PartitionKey: {partitionKey}.");
+        }
+
+
+
+
+
+
         /// <summary>
         /// Commits the experiment request, indicating it has been processed.
         /// </summary>
         /// <param name="request">The experiment request to commit.</param>
-        public async Task CommitRequestAsync(IExperimentRequest request)
+        public async Task CommitRequestAsync(ExerimentRequest request)
         {
             _logger.LogInformation("Request committed.");
             await Task.CompletedTask; // for showing the end of method
@@ -165,146 +174,141 @@ namespace MyExperiment
         /// <returns>Path to the downloaded file on local storage.</returns>
         public async Task<string> DownloadInputAsync(string fileName)
         {
+            var containerName = "containersub4";
+            var container = _blobServiceClient.GetBlobContainerClient(containerName);
+
+            var blobFileName = "8.png";
+            _logger.LogInformation($"Attempting to download file: {blobFileName} from container: {containerName}");
+
             try
             {
-                var container = _blobServiceClient.GetBlobContainerClient("containersub4");
-
-                _logger.LogInformation($"Attempting to download PNG file: {fileName}");
-                await container.CreateIfNotExistsAsync();
-
-                var blob = container.GetBlobClient(fileName);
-
-                if (await blob.ExistsAsync())
+                if (await container.ExistsAsync())
                 {
-                    var downloadResponse = await blob.DownloadAsync();
-                    var localFilePath = Path.Combine(Path.GetTempPath(), fileName);
+                    _logger.LogInformation($"Container exists: {containerName}");
 
-                    using (var fileStream = File.OpenWrite(localFilePath))
+                    var blob = container.GetBlobClient(blobFileName);
+
+                    if (await blob.ExistsAsync())
                     {
-                        await downloadResponse.Value.Content.CopyToAsync(fileStream);
-                    }
+                        var downloadResponse = await blob.DownloadAsync();
+                        var localFilePath = Path.Combine(Path.GetTempPath(), blobFileName);
+                        _logger.LogInformation($"Saving file to local path: {localFilePath}");
 
-                    _logger.LogInformation($"File downloaded to: {localFilePath}");
-                    return localFilePath;
+                        using (var fileStream = File.OpenWrite(localFilePath))
+                        {
+                            await downloadResponse.Value.Content.CopyToAsync(fileStream);
+                        }
+
+                        _logger.LogInformation($"File downloaded to: {localFilePath}");
+                        return localFilePath;
+                    }
+                    else
+                    {
+                        _logger.LogWarning($"Blob {blobFileName} does not exist in container.");
+                        return null;
+                    }
                 }
                 else
                 {
-                    _logger.LogWarning($"Blob {fileName} does not exist in container.");
+                    _logger.LogWarning($"Container {containerName} does not exist.");
                     return null;
                 }
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error occurred while downloading blob.");
-                throw new NotImplementedException();
+                throw;
             }
         }
 
 
         private bool IsBase64String(string s)
         {
-            // بررسی صحت طول رشته Base64 و ترکیب کاراکترها
             return !string.IsNullOrWhiteSpace(s) &&
                    (s.Length % 4 == 0) &&
                    Regex.IsMatch(s, @"^[a-zA-Z0-9+/=]*$");
         }
+
+
         /// <summary>
         /// Receives and processes experiment requests from the Azure Queue Storage.
         /// </summary>
         /// <param name="token">Cancellation token to allow operation cancellation.</param>
         /// <returns>Returns an experiment request if successfully processed, otherwise null.</returns>
-        public async Task<IExperimentRequest> ReceiveExperimentRequestAsync(CancellationToken token)
+        public async Task<ExerimentRequest> ReceiveExperimentRequestAsync(CancellationToken token)
         {
             _logger.LogInformation("Receiving experiment request from the queue.");
 
             while (!token.IsCancellationRequested)
             {
-                QueueMessage[] messages = await _queueClient.ReceiveMessagesAsync(maxMessages: 1, visibilityTimeout: TimeSpan.FromMinutes(1), cancellationToken: token);
-
-                if (messages.Length == 0)
-                {
-                    _logger.LogInformation("No messages found in the queue.");
-                    await Task.Delay(1000); // One second delay
-                    continue; // return to the loop to get the next message
-                }
-
-                var message = messages[0];
-                string jsonMessage;
-
-                if (!IsBase64String(message.MessageText))
-                {
-                    _logger.LogWarning("Received message is not a valid Base64 string, skipping.");
-                    await _queueClient.DeleteMessageAsync(message.MessageId, message.PopReceipt, token);
-                    continue;
-                }
-
                 try
                 {
-                    jsonMessage = Encoding.UTF8.GetString(Convert.FromBase64String(message.MessageText)); // Decode Base64
+                    QueueMessage[] messages = await _queueClient.ReceiveMessagesAsync(maxMessages: 1, visibilityTimeout: TimeSpan.FromMinutes(1), cancellationToken: token);
 
-                }
-                catch (FormatException ex)
-                {
-                    _logger.LogError(ex, "Failed to decode Base64 message.");
-                    await _queueClient.DeleteMessageAsync(message.MessageId, message.PopReceipt, token);
-                    continue; // Continue to next message
-                }
+                    if (messages.Length == 0)
+                    {
+                        _logger.LogInformation("No messages found in the queue. Waiting for new messages...");
+                        await Task.Delay(5000, token); 
+                        continue;
+                    }
 
-                if (!jsonMessage.Trim().EndsWith(".png", StringComparison.OrdinalIgnoreCase))
-                {
-                    _logger.LogWarning("Received message is not a PNG file, skipping.");
-                    await _queueClient.DeleteMessageAsync(message.MessageId, message.PopReceipt, token);
-                    continue; // Return to the loop to get the next message
-                }
+                    var message = messages[0];
+                    _logger.LogInformation($"Received message: {message.MessageText}");
 
-                byte[] fileBytes = Convert.FromBase64String(jsonMessage);
-                
-                
-                string outputPath = Path.Combine(Path.GetTempPath(), "output.png");
-                await File.WriteAllBytesAsync(outputPath, fileBytes);
+                    string jsonMessage;
+                    if (!IsBase64String(message.MessageText))
+                    {
+                        _logger.LogWarning("Received message is not a valid Base64 string, skipping.");
+                        await _queueClient.DeleteMessageAsync(message.MessageId, message.PopReceipt, token);
+                        continue;
+                    }
 
-                _logger.LogInformation($"Received message: {jsonMessage}");
+                    try
+                    {
+                        jsonMessage = Encoding.UTF8.GetString(Convert.FromBase64String(message.MessageText)); // Decode Base64
+                        _logger.LogInformation($"Decoded message: {jsonMessage}");
+                    }
+                    catch (FormatException ex)
+                    {
+                        _logger.LogError(ex, "Failed to decode Base64 message.");
+                        await _queueClient.DeleteMessageAsync(message.MessageId, message.PopReceipt, token);
+                        continue;
+                    }
 
-                if (!jsonMessage.Trim().StartsWith("{"))
-                {
-                    _logger.LogError("Received an invalid JSON message.");
-                    await _queueClient.DeleteMessageAsync(message.MessageId, message.PopReceipt, token);
-                    continue; // Return to the loop to get the next message
-                }
+                    if (!jsonMessage.Trim().StartsWith("{"))
+                    {
+                        _logger.LogWarning("Received message is not a valid JSON, skipping.");
+                        await _queueClient.DeleteMessageAsync(message.MessageId, message.PopReceipt, token);
+                        continue;
+                    }
 
-                try
-                {
-                    IExperimentRequest experimentRequest = JsonSerializer.Deserialize<ExperimentRequest>(jsonMessage);
-
+                    var experimentRequest = JsonSerializer.Deserialize<ExerimentRequest>(jsonMessage);
 
                     if (experimentRequest == null)
                     {
-                        _logger.LogError("Failed to cast ExperimentRequest to IExperimentRequest.");
+                        _logger.LogWarning("Deserialization returned null.");
                         await _queueClient.DeleteMessageAsync(message.MessageId, message.PopReceipt, token);
-                        return null;
+                        continue;
                     }
+
+                    _logger.LogInformation($"Deserialized experiment request: {JsonSerializer.Serialize(experimentRequest)}");
 
                     await _queueClient.DeleteMessageAsync(message.MessageId, message.PopReceipt, token);
                     _logger.LogInformation("Message processed and deleted from the queue.");
                     return experimentRequest;
                 }
-
-                catch (JsonException ex)
-                {
-                    _logger.LogError(ex, $"Failed to deserialize message: {jsonMessage}");
-                    await _queueClient.DeleteMessageAsync(message.MessageId, message.PopReceipt, token);
-                    return null;
-                }
                 catch (Exception ex)
                 {
-                    _logger.LogError(ex, "Error processing message from queue.");
+                    _logger.LogError(ex, "Error occurred while processing message from the queue.");
                     throw;
                 }
-
             }
-     
+
             return null;
         }
+
+
+
 
         /// <summary>
         /// Uploads the experiment result to Azure Blob Storage and saves it to Table Storage.
@@ -313,7 +317,6 @@ namespace MyExperiment
         /// <param name="result">The result object to upload.</param>
         public async Task UploadResultAsync(string experimentName, IExperimentResult result)
         {
-            //var containerName = "outputfile";
             var containerName = "containersub4";
             var blobContainerClient = _blobServiceClient.GetBlobContainerClient(containerName);
             await blobContainerClient.CreateIfNotExistsAsync();
@@ -332,20 +335,16 @@ namespace MyExperiment
 
             _logger.LogInformation($"Uploaded result to blob: {blobClient.Uri}");
 
-            await SaveResultToTableAsync(experimentName, result); // Save to Table Storage
-
         }
-
-        public Task UploadExperimentResult(IExperimentResult result)
-        {
-            throw new NotImplementedException();
-        }
-
 
         public async Task ProcessQueueAsync(CancellationToken token)
         {
+
+            int fileCount = 0;
+            const int maxFilesPerRun = 5;
+
             int emptyMessageCount = 0;
-            const int maxEmptyMessages = 3; 
+            const int maxEmptyMessages = 3;
 
             while (!token.IsCancellationRequested)
             {
@@ -357,17 +356,27 @@ namespace MyExperiment
                     if (emptyMessageCount >= maxEmptyMessages)
                     {
                         _logger.LogInformation("No more messages in the queue. Stopping process.");
-                        break; 
+                        break;
                     }
                     else
                     {
                         _logger.LogInformation("No messages found in the queue.");
-                        await Task.Delay(5000, token);  
+                        await Task.Delay(5000, token);
                         continue;
                     }
                 }
 
-                emptyMessageCount = 0; 
+                emptyMessageCount = 0;
+
+
+
+                if (fileCount >= maxFilesPerRun)
+                {
+                    _logger.LogInformation("Reached maximum number of files to process in this run.");
+                    break;
+                }
+
+
 
                 try
                 {
@@ -379,40 +388,127 @@ namespace MyExperiment
                 }
             }
         }
+
         public class YourExperimentImplementation : IExperiment
         {
             public async Task<IExperimentResult> RunAsync(string inputFile)
             {
-                var result = new ExperimentResult("partitionKey", "experimentId"); 
+                var result = new ExperimentResult("partitionKey", "experimentId");
                 return await Task.FromResult(result);
 
             }
         }
 
-        private async Task ProcessMessageAsync(IExperimentRequest message)
+
+        private async Task<string> DownloadPngFileIfValidAsync(string fileName)
         {
-            string inputFile = await DownloadInputAsync(message.InputFile);
+            var containerName = "containersub4";
+            var container = _blobServiceClient.GetBlobContainerClient(containerName);
+            var blobClient = container.GetBlobClient(fileName);
+
+            _logger.LogInformation($"Attempting to download file: {fileName} from container: {containerName}");
+
+            try
+            {
+                if (await container.ExistsAsync())
+                {
+                    _logger.LogInformation($"Container exists: {containerName}");
+
+                    if (await blobClient.ExistsAsync())
+                    {
+                        var downloadResponse = await blobClient.DownloadAsync();
+                        var localFilePath = Path.Combine(Path.GetTempPath(), fileName);
+
+                        using (var fileStream = File.OpenWrite(localFilePath))
+                        {
+                            await downloadResponse.Value.Content.CopyToAsync(fileStream);
+                        }
+
+                        if (IsPngFile(localFilePath))
+                        {
+                            _logger.LogInformation($"File downloaded and validated as PNG: {localFilePath}");
+                            return localFilePath;
+                        }
+                        else
+                        {
+                            _logger.LogWarning($"File downloaded is not a valid PNG: {localFilePath}");
+                            File.Delete(localFilePath);
+                            return null;
+                        }
+                    }
+                    else
+                    {
+                        _logger.LogWarning($"Blob {fileName} does not exist in container.");
+                        return null;
+                    }
+                }
+                else
+                {
+                    _logger.LogWarning($"Container {containerName} does not exist.");
+                    return null;
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error occurred while downloading or validating blob.");
+                throw;
+            }
+        }
+
+        private bool IsPngFile(string filePath)
+        {
+            try
+            {
+                using (var fileStream = File.OpenRead(filePath))
+                {
+                    byte[] header = new byte[8];
+                    fileStream.Read(header, 0, header.Length);
+
+                    // PNG files start with the following 8-byte signature
+                    byte[] pngSignature = { 137, 80, 78, 71, 13, 10, 26, 10 };
+
+                    return header.SequenceEqual(pngSignature);
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error occurred while validating PNG file.");
+                return false;
+            }
+        }
+
+
+
+
+        private async Task ProcessMessageAsync(ExerimentRequest message)
+        {
+            _logger.LogInformation($"Processing message with InputFile: {message.InputFile}");
+
+            // دانلود فایل PNG اگر معتبر باشد
+            string inputFile = await DownloadPngFileIfValidAsync(message.InputFile);
+
             if (string.IsNullOrEmpty(inputFile))
             {
-                _logger.LogWarning("Input file not found, skipping message.");
+                _logger.LogWarning("Input file not found or invalid, skipping message.");
                 return;
             }
 
-            IExperiment experiment = new YourExperimentImplementation();
+            _logger.LogInformation($"Input file downloaded: {inputFile}");
+
+            IExperiment experiment = new YourExperimentImplementation(); // پیاده‌سازی آزمایش خود را وارد کنید
             IExperimentResult result = await experiment.RunAsync(inputFile);
-            
+
             if (result != null)
             {
-                
-                await UploadResultAsync(result.ExperimentId, result); // Upload to Blob Storage
-                await SaveResultToTableAsync(result.ExperimentId, result); // Save to Table Storage
+                await UploadResultAsync(result.ExperimentId, result);
+
+                await SaveResultToTableAsync(result.ExperimentId, result);
             }
             else
             {
                 _logger.LogError("Experiment result is null.");
             }
-
-            await CommitRequestAsync(message);
         }
     }
 }
+

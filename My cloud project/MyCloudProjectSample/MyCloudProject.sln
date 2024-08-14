@@ -9,8 +9,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MyCloudProject.Common", "My
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Documentation", "Documentation", "{AEDF5AC9-F5A7-4287-AA52-6C0A279B1000}"
 	ProjectSection(SolutionItems) = preProject
-		Documentation\Exercises - Firstname Lastname.md = Documentation\Exercises - Firstname Lastname.md
-		Documentation\Experiment Specification - Fiestname Lastname.md = Documentation\Experiment Specification - Fiestname Lastname.md
+		Documentation\Exercises - Adeleh Behboodi.md = Documentation\Exercises - Adeleh Behboodi.md
+		Documentation\Experiment Specification - Firstname Lastname.md = Documentation\Experiment Specification - Firstname Lastname.md
 	EndProjectSection
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MyExperiment", "MyExperiment\MyExperiment.csproj", "{DBAAABB2-DCFB-4BA8-8791-E62854C2691C}"

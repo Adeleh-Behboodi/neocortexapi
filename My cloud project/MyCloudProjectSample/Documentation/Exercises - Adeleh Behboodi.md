@@ -1,6 +1,6 @@
 
 ML 23/24-4 : Implement the Spatial Pooler SDR Reconstruction - Azure Cloud Implementation
-
+-----------------------------------------------------------------------------------------
 
 
 Last year I started a project that includes Implement the Spatial Pooler SDR Reconstruction with NeocortexAPI and working locally and teamwork.The inspiration for this project comes from the intricate structure and function of the neocortex, which serves as the foundation for the Hierarchical Temporal Memory (HTM) machine learning framework. A key component within HTM is the Spatial Pooler, responsible for generating sparse distributed representations (SDRs) of input data. However, a significant challenge has been reconstructing the original input values from these SDRs. This project introduces a method called the "Reconstructor," designed to accurately reverse the encoding process and recover the original input values from their corresponding SDRs within HTM systems. By leveraging the permanence values produced by the Spatial Pooler, the Reconstructor effectively reconstructs the input data. Through comprehensive experiments and evaluations, the project demonstrates the Reconstructor’s capability in accurately recovering original input values within HTM systems. This work advances HTM technology by providing a reliable approach for reconstructing input data from SDRs, paving the way for improved data processing and pattern recognition applications.

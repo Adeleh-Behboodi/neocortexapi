@@ -2,7 +2,6 @@
 ML 23/24-4 : Implement the Spatial Pooler SDR Reconstruction - Azure Cloud Implementation
 -----------------------------------------------------------------------------------------
 
-
 Last year I started a project that includes Implement the Spatial Pooler SDR Reconstruction with NeocortexAPI and working locally and teamwork.The inspiration for this project comes from the intricate structure and function of the neocortex, which serves as the foundation for the Hierarchical Temporal Memory (HTM) machine learning framework. A key component within HTM is the Spatial Pooler, responsible for generating sparse distributed representations (SDRs) of input data. However, a significant challenge has been reconstructing the original input values from these SDRs. This project introduces a method called the "Reconstructor," designed to accurately reverse the encoding process and recover the original input values from their corresponding SDRs within HTM systems. By leveraging the permanence values produced by the Spatial Pooler, the Reconstructor effectively reconstructs the input data. Through comprehensive experiments and evaluations, the project demonstrates the Reconstructor’s capability in accurately recovering original input values within HTM systems. This work advances HTM technology by providing a reliable approach for reconstructing input data from SDRs, paving the way for improved data processing and pattern recognition applications.
 This year, the project has made significant strides by integrating with cloud-based infrastructure. The primary goal is to scale the project further, harnessing the capabilities of cloud computing to explore new dimensions in machine learning. By leveraging cloud resources, the project can handle larger datasets and deploy more advanced models, thus enhancing the accuracy and efficiency of input reconstruction within HTM systems.
 
@@ -12,12 +11,12 @@ Managing this integration individually, I am pushing the boundaries of HTM techn
 
 
 **Objective: 
-
+------------
 The objective is to assess the system's ability to accurately process and reconstruct visual data representations.
 
 
 ** Tools and Platforms Required for the Implementation of the Project:
-
+----------------------------------------------------------------------
 1- Dockerfile : https://github.com/Adeleh-Behboodi/neocortexapi/blob/CodeX/My%20cloud%20project/MyCloudProjectSample/MyCloudProject/Dockerfile
 
 2-  The docker image : https://blobcontainersub4.blob.core.windows.net/containersub4/testfile.png
@@ -34,7 +33,7 @@ The objective is to assess the system's ability to accurately process and recons
 
 
 ** Components and application:
-
+------------------------------
 1- Source code repository (GitHub): 
 A place to store program codes.
 
@@ -63,6 +62,6 @@ Store processed data in a structured format without the need for SQL.
 Ensuring efficient and scalable data storage and retrieval.
 
 **Conclusion
-
+------------
 The Neocortex API project utilizes to Azure Cloud to process image and scalar data based on neocortex principles. Experiments demonstrated its effectiveness in encoding, spatial pooling, and reconstruction of data. Scalar data were encoded and binarized images were processed to capture spatial patterns. Reconstructed outputs showed average similarity to the originals, with images exhibiting more noise than scalar inputs. Increasing the threshold reduced noise but affected image quality. Future work could focus on improving encoding and reconstruction methods and exploring real-world applications like image recognition and anomaly detection.
 This method ensures that users can effectively manage and analyze large datasets, allowing them to generate valuable insights and make robust predictions with ease. In addition, this method that facilitates the binarization of images and numbers using neocortex algorithms

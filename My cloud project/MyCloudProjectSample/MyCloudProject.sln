@@ -9,6 +9,13 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MyCloudProject.Common", "My
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Documentation", "Documentation", "{AEDF5AC9-F5A7-4287-AA52-6C0A279B1000}"
 	ProjectSection(SolutionItems) = preProject
+		Documentation\Azure Resource Group Overview.png = Documentation\Azure Resource Group Overview.png
+		Documentation\Azure Storage account - Containers .png = Documentation\Azure Storage account - Containers .png
+		Documentation\Azure Storage account - Queue.png = Documentation\Azure Storage account - Queue.png
+		Documentation\Azure Storage account - table.png = Documentation\Azure Storage account - table.png
+		Documentation\Azure Storage account Access Keys.png = Documentation\Azure Storage account Access Keys.png
+		Documentation\Azure Storage account Instance.png = Documentation\Azure Storage account Instance.png
+		Documentation\Docker desktop.png = Documentation\Docker desktop.png
 		Documentation\Exercises - Adeleh Behboodi.md = Documentation\Exercises - Adeleh Behboodi.md
 		Documentation\Experiment Specification - Firstname Lastname.md = Documentation\Experiment Specification - Firstname Lastname.md
 	EndProjectSection

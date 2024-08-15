@@ -1,4 +1,4 @@
-# Title of your SE Project - Azure Cloud Implementation
+# ML23/24-4 - Implement the Spatial Pooler SDR Reconstruction - Azure Cloud Implementation
 
 Use this file to describe your experiment.
 This file is the whole documentation you need.

@@ -15,9 +15,13 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Documentation", "Documentat
 		Documentation\Azure Storage account - table.png = Documentation\Azure Storage account - table.png
 		Documentation\Azure Storage account Access Keys.png = Documentation\Azure Storage account Access Keys.png
 		Documentation\Azure Storage account Instance.png = Documentation\Azure Storage account Instance.png
-		Documentation\Docker desktop.png = Documentation\Docker desktop.png
+		C:\Users\adele\OneDrive\Desktop\Documentation\Docker desktop - containers.png = C:\Users\adele\OneDrive\Desktop\Documentation\Docker desktop - containers.png
+		C:\Users\adele\OneDrive\Desktop\Documentation\Docker desktop - Images.png = C:\Users\adele\OneDrive\Desktop\Documentation\Docker desktop - Images.png
 		Documentation\Exercises - Adeleh Behboodi.md = Documentation\Exercises - Adeleh Behboodi.md
-		Documentation\Experiment Specification - Firstname Lastname.md = Documentation\Experiment Specification - Firstname Lastname.md
+		..\..\..\Information Technology Course SE 2023_2024_CodeX.docx = ..\..\..\Information Technology Course SE 2023_2024_CodeX.docx
+		..\..\..\Information Technology Course SE 2023_2024_CodeX.pdf = ..\..\..\Information Technology Course SE 2023_2024_CodeX.pdf
+		C:\Users\adele\OneDrive\Desktop\Publish SUB4CONTREG1.png = C:\Users\adele\OneDrive\Desktop\Publish SUB4CONTREG1.png
+		C:\Users\adele\OneDrive\Desktop\Publish SUB4CONTREG2.png = C:\Users\adele\OneDrive\Desktop\Publish SUB4CONTREG2.png
 	EndProjectSection
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MyExperiment", "MyExperiment\MyExperiment.csproj", "{DBAAABB2-DCFB-4BA8-8791-E62854C2691C}"

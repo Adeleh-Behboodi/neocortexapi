@@ -48,13 +48,13 @@ namespace MyCloudProject.Common
             }
 
             if (args != null)
+             
                 builder.AddCommandLine(args);
 
             builder.AddEnvironmentVariables();
-
             var configRoot = builder.Build();
-            
             return configRoot;
+            
         }
     }
 }

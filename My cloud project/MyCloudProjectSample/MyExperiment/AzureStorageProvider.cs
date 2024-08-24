@@ -2,554 +2,222 @@
 using Azure.Data.Tables;
 using Azure.Storage.Blobs;
 using Azure.Storage.Queues;
-using Azure.Storage.Queues.Models;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
-using MyCloudProject.Common;
-using MyExperiment.MyExperiment;
 using System;
-using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text;
 using System.Text.Json;
-using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace MyExperiment
+namespace ExperimentProcessing
 {
-
     /// <summary>
     /// Interface for handling storage operations related to experiments.
-    /// This interface defines the necessary methods to interact with Azure Storage services 
-    /// including uploading and downloading experiment-related files, processing queue messages, 
-    /// and committing experiment results.
+    /// This interface defines methods to interact with Azure Storage services
+    /// such as uploading and downloading files, and processing queue messages.
     /// </summary>
-    public interface IStorageProvider
+    public interface IStorageService
     {
         /// <summary>
-        /// Commits the experiment request to the storage.
+        /// Saves the experiment request.
         /// </summary>
-        /// <param name="request">The experiment request to commit.</param>
-        Task CommitRequestAsync(ExerimentRequest request);
+        /// <param name="request">The experiment request to save.</param>
+        Task SaveExperimentAsync(ExperimentRequest request);
 
         /// <summary>
-        /// Downloads an input file from the blob storage.
+        /// Fetches an input file from blob storage.
         /// </summary>
-        /// <param name="fileName">The name of the file to download.</param>
-        /// <returns>Returns the local path to the downloaded file.</returns>
-        Task<string> DownloadInputAsync(string fileName);
+        /// <param name="fileName">Name of the file to fetch.</param>
+        /// <returns>Path to the fetched file or a message indicating the result.</returns>
+        Task<string> FetchInputFileAsync(string fileName);
 
         /// <summary>
-        /// Receives an experiment request from the Azure Queue Storage.
-        /// Processes the queue message and returns an experiment request object.
+        /// Retrieves an experiment request from the queue.
         /// </summary>
-        /// <param name="token">Cancellation token to stop the operation.</param>
-        /// <returns>Returns an experiment request if found, otherwise null.</returns>
-        Task<ExerimentRequest> ReceiveExperimentRequestAsync(CancellationToken token);
+        /// <param name="cancellationToken">Cancellation token to cancel the operation.</param>
+        /// <returns>An experiment request object if found, otherwise null.</returns>
+        Task<ExperimentRequest> GetExperimentRequestAsync(CancellationToken cancellationToken);
 
         /// <summary>
-        /// Uploads the experiment result to the blob storage and stores it in a table.
+        /// Uploads the experiment result to blob storage.
         /// </summary>
-        /// <param name="experimentName">The name of the experiment.</param>
-        /// <param name="result">The result object to upload.</param>
-        Task UploadResultAsync(string experimentName, IExperimentResult result);
+        /// <param name="experimentId">ID of the experiment.</param>
+        /// <param name="result">Result object to upload.</param>
+        Task UploadExperimentResultAsync(string experimentId, IExperimentResult result);
     }
 
-
     /// <summary>
-    /// Implementation of the IStorageProvider interface using Azure Storage services.
-    /// This class handles operations such as downloading input files from blob storage, 
-    /// processing messages from an Azure Queue, uploading results to blob storage, 
-    /// and saving results to Azure Table Storage.
+    /// Implementation of IStorageService using Azure Storage services.
+    /// This class handles operations like downloading input files from blob storage, 
+    /// processing messages from an Azure Queue, and uploading results to blob storage.
     /// </summary>
-    public class AzureStorageProvider : IStorageProvider
+    public class AzureStorageProvider : IStorageService
     {
-        private readonly MyConfig _config;
-        private readonly BlobServiceClient _blobServiceClient;
+        private readonly ConfigSettings _settings;
+        private readonly BlobServiceClient _blobClient;
         private readonly QueueClient _queueClient;
         private readonly ILogger<AzureStorageProvider> _logger;
-        private readonly IConfiguration _configuration;
-
-
 
         /// <summary>
-        /// Initializes a new instance of the AzureStorageProvider class.
+        /// Initializes a new instance of StorageService.
         /// </summary>
         /// <param name="configuration">Configuration settings from app settings.</param>
         /// <param name="logger">Logger for logging operations and errors.</param>
-        public AzureStorageProvider(IConfiguration configuration, ILogger<AzureStorageProvider> logger)
+        public AzureStorageProvider(IConfiguration configurationRoot, ILogger<AzureStorageProvider> logger)
         {
-            _configuration = configuration;
-            _config = configuration.GetSection("MyConfig").Get<MyConfig>();
-            configuration.GetSection("MyConfig").Bind(_config);
+            _settings = configurationRoot.GetSection("ConfigSettings").Get<ConfigSettings>();
+            var blobConnStr = configurationRoot.GetValue<string>("MyConfig:AzureBlobStorageConnectionString");
+            var queueConnStr = configurationRoot.GetValue<string>("MyConfig:AzureQueueStorageConnectionString");
+            var queueName = configurationRoot.GetValue<string>("MyConfig:Queue");
 
-            var blobConnectionString = configuration.GetValue<string>("AzureBlobStorageConnectionString").ToString();
-            var queueConnectionString = configuration.GetValue<string>("AzureQueueStorageConnectionString").ToString();
-            var queueName = configuration.GetValue<string>("Queue").ToString();
 
-            if (string.IsNullOrEmpty(blobConnectionString) || string.IsNullOrEmpty(queueConnectionString) || string.IsNullOrEmpty(queueName))
+            Console.WriteLine($"BlobConnectionString: {blobConnStr}");
+            Console.WriteLine($"QueueConnectionString: {queueConnStr}");
+            Console.WriteLine($"QueueName: {queueName}");
 
+            if (string.IsNullOrWhiteSpace(blobConnStr) || string.IsNullOrWhiteSpace(queueConnStr) || string.IsNullOrWhiteSpace(queueName))
             {
-                logger?.LogError("Blob connection string or Queue connection string or Queue name is null or empty.");
-                throw new ArgumentException("Blob connection string, Queue connection string, or Queue name is required.");
+                throw new ArgumentException("Blob or Queue connection settings are missing.");
             }
 
-            _blobServiceClient = new BlobServiceClient(blobConnectionString);
-            _queueClient = new QueueClient(queueConnectionString, queueName);
-            _logger = logger ?? throw new ArgumentNullException(nameof(logger));
+            _blobClient = new BlobServiceClient(blobConnStr);
+            _queueClient = new QueueClient(queueConnStr, queueName);
+            _logger = logger;
         }
 
-
-
         /// <summary>
-        /// Represents an entity in Azure Table Storage for storing experiment results.
+        /// Saves the experiment request to the system.
         /// </summary>
-        public class ExperimentEntity : ITableEntity
-        {
-            public string PartitionKey { get; set; }
-            public DateTimeOffset? Timestamp { get; set; }
-            public string RowKey { get; set; }
-            public string ResultJson { get; set; }
-            public ETag ETag { get; set; }
-
-            // Required for deserialization
-            public ExperimentEntity() { }
-
-            public ExperimentEntity(string partitionKey, string rowKey, string resultJson)
-            {
-                PartitionKey = partitionKey;
-                RowKey = rowKey;
-                ResultJson = resultJson;
-            }
-        }
-
-
-
-        /// <summary>
-        /// Saves the experiment result to Azure Table Storage.
-        /// </summary>
-        /// <param name="partitionKey">Partition key for the table entity.</param>
-        /// <param name="result">Experiment result to save.</param>
-        public async Task SaveResultToTableAsync(string partitionKey, IExperimentResult result)
-        {
-            var tableName = _config.ResultTable;
-            var tableClient = new TableClient(_config.AzureTableStorageConnectionString, tableName);
-
-            await tableClient.CreateIfNotExistsAsync();
-
-            var entity = new ExperimentEntity
-            {
-                PartitionKey = partitionKey,
-                RowKey = Guid.NewGuid().ToString(),
-                ResultJson = JsonSerializer.Serialize(result)
-            };
-
-            await tableClient.AddEntityAsync(entity);
-            _logger.LogInformation($"Result saved to table with PartitionKey: {partitionKey}.");
-        }
-
-
-
-        /// <summary>
-        /// Commits the experiment request, indicating it has been processed.
-        /// </summary>
-        /// <param name="request">The experiment request to commit.</param>
-        public async Task CommitRequestAsync(ExerimentRequest request)
+        /// <param name="request">The experiment request to save.</param>
+        public async Task SaveExperimentAsync(ExperimentRequest request)
         {
             try
             {
                 if (request == null)
                 {
-                    _logger.LogWarning("Received null request.");
                     throw new ArgumentNullException(nameof(request), "Request cannot be null.");
                 }
-
-                //await SaveRequestToDatabaseAsync(request);
-
-                _logger.LogInformation("Request committed successfully.");
+                _logger.LogInformation("Experiment request saved.");
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error occurred while committing request.");
-                throw; 
-            }
-        }
-
-
-        /// <summary>
-        /// Downloads an input file from Azure Blob Storage.
-        /// </summary>
-        /// <param name="fileName">The name of the file to download.</param>
-        /// <returns>Path to the downloaded file on local storage.</returns>
-        /// 
-        public async Task<string> DownloadInputAsync(string fileName)
-        {
-            return await DownloadInputAsync(fileName, isOutput: false);
-        }
-        public async Task<string> DownloadInputAsync(string fileName, bool isOutput = false)
-        {
-            var containerName = isOutput ? "outputfile" : "containersub4";
-
-
-            var container = _blobServiceClient.GetBlobContainerClient(containerName);
-            var blobClient = container.GetBlobClient(fileName);
-
-            _logger.LogInformation($"Attempting to download file: {fileName} from container: {containerName}");
-
-            try
-            {
-                if (await container.ExistsAsync())
-                {
-                    _logger.LogInformation($"Container exists: {containerName}");
-
-
-
-                    if (await blobClient.ExistsAsync())
-                    {
-                        var downloadResponse = await blobClient.DownloadAsync();
-
-                        using (var memoryStream = new MemoryStream())
-                        {
-                            await downloadResponse.Value.Content.CopyToAsync(memoryStream);
-                            memoryStream.Position = 0;
-
-                            if (isOutput)
-                            {
-                                var convertedStream = await ConvertFileToOutputFormatAsync(memoryStream);
-                                await UploadFileToOutputContainerAsync(fileName, convertedStream);
-                                return blobClient.Uri.ToString();
-
-                            }
-                            else
-                            {
-
-                                if (containerName == "containersub4" && !IsPngFile(memoryStream))
-                                {
-                                    _logger.LogWarning($"File downloaded is not a valid PNG.");
-                                    return null;
-                                }
-                                else
-                                {
-                                    _logger.LogInformation($"File downloaded successfully.");
-                                    return "File downloaded to memory";
-                                }
-                            }
-                        }
-                    }
-
-                    else
-                    {
-                        _logger.LogWarning($"Blob {fileName} does not exist in container.");
-                        return null;
-                    }
-                }
-                else
-                {
-                    _logger.LogWarning($"Container {containerName} does not exist.");
-                    return null;
-                }
-            }
-
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Error occurred while downloading or validating blob.");
+                _logger.LogError(ex, "Error saving experiment request.");
                 throw;
             }
         }
 
-
-
-
-        private async Task UploadFileToOutputContainerAsync(string fileName, Stream fileStream)
+        /// <summary>
+        /// Fetches an input file from blob storage.
+        /// </summary>
+        /// <param name="fileName">The name of the file to fetch.</param>
+        /// <returns>Path to the fetched file or a message indicating the result.</returns>
+        public async Task<string> FetchInputFileAsync(string fileName)
         {
-            var containerName = "outputfile";
-            var container = _blobServiceClient.GetBlobContainerClient(containerName);
-            var blobClient = container.GetBlobClient(fileName);
+            var container = _blobClient.GetBlobContainerClient("inputfiles");
+            var blob = container.GetBlobClient(fileName);
 
-            _logger.LogInformation($"Attempting to upload file: {fileName} to container: {containerName}");
+            if (!await container.ExistsAsync() || !await blob.ExistsAsync())
+            {
+                _logger.LogWarning($"Blob or container not found.");
+                return null;
+            }
 
-            fileStream.Position = 0; // Ensure the stream position is at the beginning
-            await blobClient.UploadAsync(fileStream, overwrite: true);
+            using var memoryStream = new MemoryStream();
+            await blob.DownloadToAsync(memoryStream);
+            memoryStream.Position = 0;
 
-            _logger.LogInformation($"File uploaded to: {blobClient.Uri}");
+            return "File fetched and processed.";
         }
-
-        private async Task<Stream> ConvertFileToOutputFormatAsync(Stream inputStream)
-        {
-            var outputStream = new MemoryStream();
-            // Conversion logic here
-            return outputStream;
-        }
-
-
-        private bool IsBase64String(string s)
-        {
-            return !string.IsNullOrWhiteSpace(s) &&
-                   (s.Length % 4 == 0) &&
-                   Regex.IsMatch(s, @"^[a-zA-Z0-9+/=]*$");
-        }
-
 
         /// <summary>
-        /// Checks if the stream represents a PNG file.
+        /// Retrieves an experiment request from the Azure Queue.
+        /// Processes the message and returns the experiment request.
         /// </summary>
-        private bool IsPngFile(Stream fileStream)
+        /// <param name="cancellationToken">Cancellation token to cancel the operation.</param>
+        /// <returns>An experiment request object if found, otherwise null.</returns>
+        public async Task<ExperimentRequest> GetExperimentRequestAsync(CancellationToken cancellationToken)
         {
-            try
+            while (!cancellationToken.IsCancellationRequested)
             {
-                byte[] header = new byte[8];
-                fileStream.Read(header, 0, header.Length);
-                fileStream.Position = 0; // Reset stream position after reading
+                var messages = await _queueClient.ReceiveMessagesAsync(maxMessages: 1, visibilityTimeout: TimeSpan.FromMinutes(1), cancellationToken: cancellationToken);
 
-                byte[] pngSignature = { 137, 80, 78, 71, 13, 10, 26, 10 };
+                if (messages.Value.Length == 0)
+                {
+                    await Task.Delay(5000, cancellationToken); // Wait before checking the queue again
+                    continue;
+                }
 
-                return header.SequenceEqual(pngSignature);
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Error occurred while validating PNG file.");
-                return false;
-            }
-        }
-
-
-
-
-
-
-        /// <summary>
-        /// Receives and processes experiment requests from the Azure Queue Storage.
-        /// </summary>
-        /// <param name="token">Cancellation token to allow operation cancellation.</param>
-        /// <returns>Returns an experiment request if successfully processed, otherwise null.</returns>
-        public async Task<ExerimentRequest> ReceiveExperimentRequestAsync(CancellationToken token)
-        {
-            _logger.LogInformation("Receiving experiment request from the queue.");
-
-            while (!token.IsCancellationRequested)
-            {
+                var message = messages.Value[0];
                 try
                 {
-                    QueueMessage[] messages = await _queueClient.ReceiveMessagesAsync(maxMessages: 1, visibilityTimeout: TimeSpan.FromMinutes(1), cancellationToken: token);
-
-                    if (messages.Length == 0)
-                    {
-                        _logger.LogInformation("No messages found in the queue. Waiting for new messages...");
-                        await Task.Delay(5000, token); 
-                        continue;
-                    }
-
-                    var message = messages[0];
-                    _logger.LogInformation($"Received message: {message.MessageText}");
-
-                    string jsonMessage;
-                    if (!IsBase64String(message.MessageText))
-                    {
-                        _logger.LogWarning("Received message is not a valid Base64 string, skipping.");
-                        await _queueClient.DeleteMessageAsync(message.MessageId, message.PopReceipt, token);
-                        continue;
-                    }
-
-                    try
-                    {
-                        jsonMessage = Encoding.UTF8.GetString(Convert.FromBase64String(message.MessageText)); // Decode Base64                        
-                        _logger.LogInformation($"Decoded message: {jsonMessage}");
-                    }
-                    catch (FormatException ex)
-                    {
-                        _logger.LogError(ex, "Failed to decode Base64 message.");
-                        await _queueClient.DeleteMessageAsync(message.MessageId, message.PopReceipt, token);
-                        continue;
-                    }
-
-                    if (!jsonMessage.Trim().StartsWith("{"))
-                    {
-                        _logger.LogWarning("Received message is not a valid JSON, skipping.");
-                        await _queueClient.DeleteMessageAsync(message.MessageId, message.PopReceipt, token);
-                        continue;
-                    }
-
-                    var experimentRequest = JsonSerializer.Deserialize<ExerimentRequest>(jsonMessage);
-
-                    if (experimentRequest == null)
-                    {
-                        _logger.LogWarning("Deserialization returned null.");
-                        await _queueClient.DeleteMessageAsync(message.MessageId, message.PopReceipt, token);
-                        continue;
-                    }
-
-                    _logger.LogInformation($"Deserialized experiment request: {JsonSerializer.Serialize(experimentRequest)}");
-
-                    await _queueClient.DeleteMessageAsync(message.MessageId, message.PopReceipt, token);
-                    _logger.LogInformation("Message processed and deleted from the queue.");
-                    return experimentRequest;
+                    var json = Encoding.UTF8.GetString(Convert.FromBase64String(message.MessageText));
+                    var request = JsonSerializer.Deserialize<ExperimentRequest>(json);
+                    await _queueClient.DeleteMessageAsync(message.MessageId, message.PopReceipt);
+                    return request;
                 }
                 catch (Exception ex)
                 {
-                    _logger.LogError(ex, "Error occurred while processing message from the queue.");
-                    throw;
+                    _logger.LogError(ex, "Error processing queue message.");
+                    await _queueClient.DeleteMessageAsync(message.MessageId, message.PopReceipt);
                 }
             }
 
             return null;
         }
 
-
-
         /// <summary>
-        /// Uploads the experiment result to Azure Blob Storage and saves it to Table Storage.
+        /// Uploads the experiment result to Azure Blob Storage.
         /// </summary>
-        /// <param name="experimentName">The name of the experiment.</param>
-        /// <param name="result">The result object to upload.</param>
-        public async Task UploadResultAsync(string experimentName, IExperimentResult result)
+        /// <param name="experimentId">ID of the experiment.</param>
+        /// <param name="result">Result object to upload.</param>
+        public async Task UploadExperimentResultAsync(string experimentId, IExperimentResult result)
         {
-            var containerName = "outputfile"; 
-            var blobContainerClient = _blobServiceClient.GetBlobContainerClient(containerName);
-            await blobContainerClient.CreateIfNotExistsAsync();
-            
-            var blobName = $"{experimentName}_{DateTime.Now:yyyyMMddHHmmss}.json";
-            var blobClient = blobContainerClient.GetBlobClient(blobName);
-            var json = JsonSerializer.Serialize(result);
-            using (var stream = new MemoryStream(Encoding.UTF8.GetBytes(json)))
-            {
-                _logger.LogInformation($"Uploading result to container: {containerName}");
-                _logger.LogInformation($"Blob name: {blobName}");
-                await blobClient.UploadAsync(stream, overwrite: true);
-            }
+            var container = _blobClient.GetBlobContainerClient("results");
+            await container.CreateIfNotExistsAsync();
+            var blobName = $"{experimentId}_{DateTime.UtcNow:yyyyMMddHHmmss}.json";
+            var blob = container.GetBlobClient(blobName);
 
-            _logger.LogInformation($"Uploaded result to blob: {blobClient.Uri}");
+            using var stream = new MemoryStream(Encoding.UTF8.GetBytes(JsonSerializer.Serialize(result)));
+            await blob.UploadAsync(stream, overwrite: true);
 
-        }
-
-
-
-        /// <summary>
-        /// 
-        /// </summary>
-        public async Task ProcessQueueAsync(CancellationToken token)
-        {
-
-            int fileCount = 0;
-            const int maxFilesPerRun = 5;
-
-            int emptyMessageCount = 0;
-            const int maxEmptyMessages = 3;
-
-            while (!token.IsCancellationRequested)
-            {
-                var message = await ReceiveExperimentRequestAsync(token);
-
-                if (message == null)
-                {
-                    emptyMessageCount++;
-                    if (emptyMessageCount >= maxEmptyMessages)
-                    {
-                        _logger.LogInformation("No more messages in the queue. Stopping process.");
-                        break;
-                    }
-                    else
-                    {
-                        _logger.LogInformation("No messages found in the queue.");
-                        await Task.Delay(5000, token);
-                        continue;
-                    }
-                }
-
-                emptyMessageCount = 0;
-
-                if (fileCount >= maxFilesPerRun)
-                {
-                    _logger.LogInformation("Reached maximum number of files to process in this run.");
-                    break;
-                }
-                try
-                {
-                    await ProcessMessageAsync(message);
-                }
-                catch (Exception ex)
-                {
-                    _logger.LogError(ex, "Error processing message.");
-                }
-            }
-        }
-
-
-
-        /// <summary>
-        /// 
-        /// </summary>
-        public class YourExperimentImplementation : IExperiment
-        {
-            public async Task<IExperimentResult> RunAsync(string inputFile)
-            {
-                var result = new ExperimentResult("partitionKey", "experimentId");
-                return await Task.FromResult(result);
-
-            }
-        }
-
-
-
-
-        /// <summary>
-        /// 
-        /// </summary>
-        private async Task ProcessMessageAsync(ExerimentRequest message)
-        {
-            _logger.LogInformation($"Processing message with InputFile: {message.InputFile}");
-
-            string inputFile = await DownloadInputAsync(message.InputFile, isOutput: false);
-
-
-            if (string.IsNullOrEmpty(inputFile))
-            {
-                _logger.LogWarning("Input file not found or invalid, skipping message.");
-                return;
-            }
-
-            _logger.LogInformation($"Input file downloaded: {inputFile}");
-
-            IExperiment experiment = new YourExperimentImplementation(); 
-            IExperimentResult result = await experiment.RunAsync(inputFile);
-
-            if (result != null)
-            {
-                await UploadResultAsync(result.ExperimentId, result);
-
-                var resultJson = JsonSerializer.Serialize(result);
-                await SendMessageToQueueAsync(resultJson);
-
-                await SaveResultToTableAsync(result.ExperimentId, result);
-            }
-            else
-            {
-                _logger.LogError("Experiment result is null.");
-            }
-        }
-
-
-
-        /// <summary>
-        /// 
-        /// </summary>
-        private async Task SendMessageToQueueAsync(string messageText)
-        {
-            var triggerQueueName = "trigger-queue"; 
-            var triggerQueueClient = new QueueClient(_configuration.GetValue<string>("AzureQueueStorageConnectionString"), triggerQueueName);
-            await triggerQueueClient.CreateIfNotExistsAsync();
-
-            if (await triggerQueueClient.ExistsAsync())
-            {
-                await triggerQueueClient.SendMessageAsync(Convert.ToBase64String(Encoding.UTF8.GetBytes(messageText)));
-                _logger.LogInformation("Message sent to trigger queue.");
-            }
-            else
-            {
-                _logger.LogWarning($"Queue {triggerQueueName} does not exist.");
-            }
+            _logger.LogInformation($"Result uploaded to blob: {blob.Uri}");
         }
     }
-}
 
+    /// <summary>
+    /// Configuration settings for the AzureStorageProvider.
+    /// </summary>
+    public class ConfigSettings
+    {
+        public string ResultTableName { get; set; }
+        public string TableStorageConnectionString { get; set; }
+    }
+
+    /// <summary>
+    /// Represents a request for an experiment.
+    /// </summary>
+    public class ExperimentRequest
+    {
+        public string InputFile { get; set; }
+    }
+
+    /// <summary>
+    /// Interface for experiment results.
+    /// </summary>
+    public interface IExperimentResult
+    {
+        string ExperimentId { get; }
+    }
+
+    /// <summary>
+    /// Represents the result of an experiment.
+    /// </summary>
+    public class ExperimentResult : IExperimentResult
+    {
+        public string ExperimentId { get; set; }
+        public ExperimentResult(string id) => ExperimentId = id;
+    }
+}

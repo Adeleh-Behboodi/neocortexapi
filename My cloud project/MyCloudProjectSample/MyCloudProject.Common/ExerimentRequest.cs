@@ -7,7 +7,7 @@ namespace MyCloudProject.Common
     /// <summary>
     /// Defines the contract for the message request that will run your experiment.
     /// </summary>
-    public interface ExerimentRequest
+    public class ExerimentRequest
     {
         /// <summary>
         /// Any identifier of yout choice.

@@ -122,7 +122,7 @@ namespace NeoCortexApiSample
 
             var spatialPooler = new SpatialPooler(homeostaticController);
             spatialPooler.Init(memory, new DistributedMemory { ColumnDictionary = new InMemoryDistributedDictionary<int, Column>(1) });
-            var cortexLayer = new CortexLayer<object, object>("Layer1");
+            var cortexLayer = new CortexLayer<object, object>("Layer");
 
             cortexLayer.HtmModules.Add("encoder", encoder);
             cortexLayer.HtmModules.Add("spatialPooler", spatialPooler);

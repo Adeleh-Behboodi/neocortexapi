@@ -1,5 +1,4 @@
-﻿using MyCloudProject.Common; 
-using System;
+﻿using System;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Configuration;
 using System.Threading;
@@ -9,121 +8,114 @@ using Azure.Storage.Queues;
 using System.Text.Json;
 using System.Text;
 using MyExperiment;
+using ExperimentProcessing;
+using MyCloudProject.Common;
+
 
 namespace MyCloudProject
 {
     class Program
     {
         /// <summary>
-        /// Your project ID from the last semester.
+        /// Identifies the project.
         /// </summary>
         private static string _projectName = "ML 23/24-4";
-        string test;
 
         static async Task Main(string[] args)
         {
-            CancellationTokenSource tokeSrc = new CancellationTokenSource();
-
+            // Set up cancellation token to handle application shutdown
+            var tokenSource = new CancellationTokenSource();
             Console.CancelKeyPress += (sender, e) =>
             {
-                e.Cancel = true;
-                tokeSrc.Cancel();
+                e.Cancel = true; // Prevent the application from terminating immediately
+                tokenSource.Cancel();
             };
 
-            Console.WriteLine($"Started experiment: {_projectName}");
+            Console.WriteLine($"Experiment: {_projectName} has started");
 
-            // Init configuration
-            var cfgRoot = Common.InitHelpers.InitConfiguration(args);
+            // Initialize configuration
+            var configurationRoot = InitHelpers.InitConfiguration(args);
+            var configurationSection = configurationRoot.GetSection("MyConfig");
 
-            var cfgSec = cfgRoot.GetSection("MyConfig");
-
-            // InitLogging
-            var logFactory = InitHelpers.InitLogging(cfgRoot);
-
+            // Initialize logging
+            var logFactory = InitHelpers.InitLogging(configurationRoot);
             var logger = logFactory.CreateLogger<AzureStorageProvider>();
 
-            logger?.LogInformation($"{DateTime.Now} - Started experiment: {_projectName}");
+            logger?.LogInformation($"{DateTime.Now} - Initialization complete for: {_projectName}");
 
-            var storageProvider = new AzureStorageProvider(cfgSec, logger);
+            // Create the storage provider instance
+            var storageProvider = new AzureStorageProvider(configurationSection, logger);
 
-
-            // Step 1: Test Download Input File
-            var testFileName = "testfile.png";
+            // Try downloading an input file
+            var testFileName = "8.png";
             try
             {
-                // Call DownloadInputAsync method to download the file
-                logger?.LogInformation($"Attempting to download file: {testFileName}");
-                var localFilePath = await storageProvider.DownloadInputAsync(testFileName);
+                logger?.LogInformation($"Starting download of file: {testFileName}");
+                var localFilePath = await storageProvider.FetchInputFileAsync(testFileName); // اصلاح نام متد
 
-                if (localFilePath != null)
+                if (!string.IsNullOrEmpty(localFilePath))
                 {
-                    logger?.LogInformation($"Successfully downloaded input file to: {localFilePath}");
+                    logger?.LogInformation($"File successfully downloaded to: {localFilePath}");
                 }
                 else
                 {
-                    logger?.LogWarning($"Failed to download input file: {testFileName}");
+                    logger?.LogWarning($"Failed to download file: {testFileName}");
                 }
             }
             catch (Exception ex)
             {
-                logger?.LogError(ex, "An error occurred while downloading the input file.");
+                logger?.LogError(ex, "Error occurred during file download.");
             }
 
-            // Continue with the rest of the program logic...
+            // Initialize experiment processing
 
-            logger?.LogInformation($"{DateTime.Now} - Experiment exit: {_projectName}");
-       
+            var experiment = new Experiment(configurationSection, storageProvider, logger);
+            
+            logger?.LogInformation($"Cancellation token status: {tokenSource.Token.IsCancellationRequested}");
 
-
-
-            //MyExperiment.IStorageProvider storageProvider = new AzureStorageProvider(cfgSec, logger);
-
-            //await DownloadInputAsync((AzureStorageProvider)storageProvider);
-
-            IExperiment experiment = new Experiment(cfgSec, storageProvider, logger as ILogger<Experiment>);
-            logger?.LogInformation($"Token IsCancellationRequested: {tokeSrc.Token.IsCancellationRequested}");
-
-            while (!tokeSrc.Token.IsCancellationRequested)
+            // Main loop to handle experiment requests
+            while (!tokenSource.Token.IsCancellationRequested)
             {
-                ExerimentRequest request = await storageProvider.ReceiveExperimentRequestAsync(tokeSrc.Token);
+                var request = await storageProvider.GetExperimentRequestAsync(tokenSource.Token); // اصلاح نام متد
 
                 if (request != null)
                 {
                     try
                     {
-                        // Step 4.
+                        logger?.LogInformation($"Processing experiment request: {request.InputFile}");
 
-                        logger?.LogInformation($"Attempting to download input file: {request.InputFile}");
-                        var localFileWithInputArgs = await storageProvider.DownloadInputAsync(request.InputFile);
+                        var localFileWithInputArgs = await storageProvider.FetchInputFileAsync(request.InputFile); // اصلاح نام متد
 
-                        if (localFileWithInputArgs != null)
+                        if (!string.IsNullOrEmpty(localFileWithInputArgs))
                         {
-                            logger?.LogInformation($"Successfully downloaded input file to: {localFileWithInputArgs}");
+                            logger?.LogInformation($"Input file downloaded to: {localFileWithInputArgs}");
                         }
                         else
                         {
                             logger?.LogWarning($"Failed to download input file: {request.InputFile}");
                         }
 
-                        IExperimentResult result = await experiment.RunAsync(localFileWithInputArgs);
+                        var result = await experiment.RunAsync(localFileWithInputArgs);//
 
-                        await storageProvider.UploadResultAsync("outputfile", result);
+                        await storageProvider.UploadExperimentResultAsync("outputfile", (ExperimentProcessing.IExperimentResult)result);
 
-                        await storageProvider.CommitRequestAsync(request);
+
+
+                        await storageProvider.SaveExperimentAsync(request);
                     }
                     catch (Exception ex)
                     {
-                        logger.LogError(ex, "An error occurred while processing the request.");
+                        logger.LogError(ex, "Error occurred while processing the request.");
                     }
                 }
                 else
                 {
-                    await Task.Delay(500);
-                    logger?.LogTrace("Queue empty...");
+                    await Task.Delay(500); // Delay to avoid tight loop
+                    logger?.LogTrace("No requests in the queue.");
                 }
             }
 
-            logger?.LogInformation($"{DateTime.Now} - Experiment exit: {_projectName}");
+            logger?.LogInformation($"{DateTime.Now} - Experiment concluded: {_projectName}");
         }
     }
 }

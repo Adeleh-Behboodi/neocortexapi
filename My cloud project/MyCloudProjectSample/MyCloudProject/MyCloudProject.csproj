@@ -9,8 +9,11 @@
     <None Include="..\.editorconfig" Link=".editorconfig" />
   </ItemGroup>
   <ItemGroup>
-    <PackageReference Include="Azure.Storage.Queues" Version="12.18.0" />
-    <PackageReference Include="Microsoft.VisualStudio.Azure.Containers.Tools.Targets" Version="1.20.1" />
+    <PackageReference Include="Azure.Storage.Queues" Version="12.19.1" />
+    <PackageReference Include="ImageBinarizer" Version="1.6.0" />
+    <PackageReference Include="Microsoft.VisualStudio.Azure.Containers.Tools.Targets" Version="1.21.0" />
+    <PackageReference Include="NeoCortexApi" Version="1.1.5" />
+    <PackageReference Include="NUPKG" Version="1.0.0" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\MyCloudProject.Common\MyCloudProject.Common.csproj" />

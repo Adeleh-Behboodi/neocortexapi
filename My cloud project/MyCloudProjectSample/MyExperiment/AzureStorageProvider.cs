@@ -82,6 +82,7 @@ namespace MyExperiment
         public AzureStorageProvider(IConfiguration configuration, ILogger<AzureStorageProvider> logger)
         {
             _configuration = configuration;
+            _config = configuration.GetSection("MyConfig").Get<MyConfig>();
             configuration.GetSection("MyConfig").Bind(_config);
 
             var blobConnectionString = configuration.GetValue<string>("AzureBlobStorageConnectionString").ToString();
@@ -157,10 +158,24 @@ namespace MyExperiment
         /// <param name="request">The experiment request to commit.</param>
         public async Task CommitRequestAsync(ExerimentRequest request)
         {
-            _logger.LogInformation("Request committed.");
-            await Task.CompletedTask; 
-        }
+            try
+            {
+                if (request == null)
+                {
+                    _logger.LogWarning("Received null request.");
+                    throw new ArgumentNullException(nameof(request), "Request cannot be null.");
+                }
 
+                //await SaveRequestToDatabaseAsync(request);
+
+                _logger.LogInformation("Request committed successfully.");
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error occurred while committing request.");
+                throw; 
+            }
+        }
 
 
         /// <summary>

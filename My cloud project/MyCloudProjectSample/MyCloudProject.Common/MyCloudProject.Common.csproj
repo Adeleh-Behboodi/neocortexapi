@@ -6,7 +6,9 @@
 
   <ItemGroup>
 
-    <PackageReference Include="Azure.Storage.Queues" Version="12.18.0" />
+    <PackageReference Include="Azure.Storage.Queues" Version="12.19.1" />
+
+    <PackageReference Include="ImageBinarizer" Version="1.6.0" />
 
     <PackageReference Include="Microsoft.Extensions.Configuration.Abstractions" Version="8.0.0" />
     <PackageReference Include="Microsoft.Extensions.Configuration.CommandLine" Version="8.0.0" />
@@ -15,6 +17,8 @@
     <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="8.0.1" />
     <PackageReference Include="Microsoft.Extensions.Logging.Console" Version="8.0.0" />
     <PackageReference Include="Microsoft.Extensions.Logging.Debug" Version="8.0.0" />
+    <PackageReference Include="NeoCortexApi" Version="1.1.5" />
+    <PackageReference Include="NUPKG" Version="1.0.0" />
   </ItemGroup>
 
 </Project>

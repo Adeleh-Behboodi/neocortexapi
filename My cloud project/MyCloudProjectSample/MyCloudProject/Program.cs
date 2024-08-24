@@ -20,8 +20,6 @@ namespace MyCloudProject
         private static string _projectName = "ML 23/24-4";
         string test;
 
-
-
         static async Task Main(string[] args)
         {
             CancellationTokenSource tokeSrc = new CancellationTokenSource();
@@ -47,7 +45,6 @@ namespace MyCloudProject
             logger?.LogInformation($"{DateTime.Now} - Started experiment: {_projectName}");
 
             var storageProvider = new AzureStorageProvider(cfgSec, logger);
-
 
 
             // Step 1: Test Download Input File

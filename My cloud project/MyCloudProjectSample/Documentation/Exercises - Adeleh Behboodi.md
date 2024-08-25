@@ -19,7 +19,9 @@ The objective is to assess the system's ability to accurately process and recons
 # Links related to cloud projects
 
 1- My Experiment [link](https://github.com/Adeleh-Behboodi/neocortexapi/blob/CodeX/My%20cloud%20project/MyCloudProjectSample/MyExperiment/MyExperiment.csproj)
+
 2- SpartialPatternLearning.cs [link](https://github.com/Adeleh-Behboodi/neocortexapi/blob/CodeX/My%20cloud%20project/MyCloudProjectSample/MyExperiment/SpartialPatternLearning.cs)
+
 3- 
 
 
@@ -27,11 +29,17 @@ The objective is to assess the system's ability to accurately process and recons
 # Tools and Platforms Required for the Implementation of the Project:
 
 1- Dockerfile : [link](https://github.com/Adeleh-Behboodi/neocortexapi/blob/CodeX/My%20cloud%20project/MyCloudProjectSample/MyCloudProject/Dockerfile)
+
 2-  The docker image : [link](https://blobcontainersub4.blob.core.windows.net/containersub4/testfile.png)
+
 3- The source code: [link](https://github.com/Adeleh-Behboodi/neocortexapi/tree/CodeX)
+
 4- Azure Blob Storage : [link](https://portal.azure.com/#@stud.fra-uas.de/resource/subscriptions/5adcff6e-ace2-4012-b13c-dc7a940afff2/resourceGroups/RG-AB-SUB4/providers/Microsoft.Storage/storageAccounts/blobcontainersub4/keys)
+
 5- The App service : [link](https://portal.azure.com/#@stud.fra-uas.de/resource/subscriptions/5adcff6e-ace2-4012-b13c-dc7a940afff2/resourceGroups/RG-Ex2/providers/Microsoft.Web/sites/ccappwebadeleh/appServices)
+
 6- The container registry : [link](https://portal.azure.com/#@stud.fra-uas.de/resource/subscriptions/5adcff6e-ace2-4012-b13c-dc7a940afff2/resourceGroups/RG-AB-SUB4/providers/Microsoft.ContainerRegistry/registries/SUB4CONTREG/overview)
+
 7- The function app : [link](https://portal.azure.com/#@stud.fra-uas.de/resource/subscriptions/5adcff6e-ace2-4012-b13c-dc7a940afff2/resourceGroups/RG-AB-SUB4/providers/Microsoft.Web/sites/SUB4/appServices)
 
 
@@ -43,13 +51,20 @@ A place to store program codes.
 #### 2- Docker : 
 A place to host Docker images built from source code.
 Facilitating the distribution and management of Docker images.
-![Fig.1 Building Docker Image](https://github.com/Adeleh-Behboodi/neocortexapi/blob/CodeX/My%20cloud%20project/MyCloudProjectSample/Documentation/Docker%20desktop%20-%20Images.png)
-![Fig.2 Building Docker Container](https://github.com/Adeleh-Behboodi/neocortexapi/blob/CodeX/My%20cloud%20project/MyCloudProjectSample/Documentation/Docker%20desktop%20-%20containers.png)
+
+![Fig.1](https://github.com/Adeleh-Behboodi/neocortexapi/blob/CodeX/My%20cloud%20project/MyCloudProjectSample/Documentation/Docker%20desktop%20-%20Images.png)
+_Fig.1 Building Docker Image_
+
+![Fig.2](https://github.com/Adeleh-Behboodi/neocortexapi/blob/CodeX/My%20cloud%20project/MyCloudProjectSample/Documentation/Docker%20desktop%20-%20containers.png)
+_Fig.2 Building Docker Container_
 
 #### 3- Azure Container Registry (ACR): 
 Secure space to store and manage Docker images in Azure environment.
 Suitable for integration with other Azure services.
 Azure Container Instances (ACI): Management and implementation of container programs.
+
+![Fig.3]()
+_Fig.3 Azure Container Registry_
 
 #### 4- Azure Container Instances (ACI): 
 Management and implementation of container programs.

@@ -22,7 +22,8 @@ namespace MyExperiment
         private ILogger logger;
 
         private MyConfig config;
-
+        private IConfigurationSection configurationSection;
+        private ExperimentProcessing.AzureStorageProvider storageProvider1;
         private readonly ILogger<Experiment> _logger;
 
         public Experiment(IConfigurationSection configSection, IStorageProvider storageProvider, ILogger log)
@@ -34,6 +35,12 @@ namespace MyExperiment
             configSection.Bind(config);
         }
 
+        public Experiment(IConfigurationSection configurationSection, ExperimentProcessing.AzureStorageProvider storageProvider1, ILogger<ExperimentProcessing.AzureStorageProvider> logger)
+        {
+            this.configurationSection = configurationSection;
+            this.storageProvider1 = storageProvider1;
+            this.logger = logger;
+        }
 
         public Task<IExperimentResult> RunAsync(string inputData)
         {

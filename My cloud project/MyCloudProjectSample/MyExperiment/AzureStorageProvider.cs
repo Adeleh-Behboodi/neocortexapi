@@ -69,17 +69,17 @@ namespace ExperimentProcessing
         public AzureStorageProvider(IConfiguration configurationRoot, ILogger<AzureStorageProvider> logger)
         {
             _settings = configurationRoot.GetSection("ConfigSettings").Get<ConfigSettings>();
-            var blobConnStr = configurationRoot.GetValue<string>("MyConfig:AzureBlobStorageConnectionString");
-            var queueConnStr = configurationRoot.GetValue<string>("MyConfig:AzureQueueStorageConnectionString");
-            var queueName = configurationRoot.GetValue<string>("MyConfig:Queue");
+            var blobConnStr = configurationRoot.GetValue<string>("AzureBlobStorageConnectionString");
+            var queueConnStr = configurationRoot.GetValue<string>("AzureQueueStorageConnectionString");
+            var queueName = configurationRoot.GetValue<string>("Queue");
 
-
-            Console.WriteLine($"BlobConnectionString: {blobConnStr}");
-            Console.WriteLine($"QueueConnectionString: {queueConnStr}");
-            Console.WriteLine($"QueueName: {queueName}");
+            //logger?.LogInformation($"AzureBlobStorageConnectionString: {blobConnStr ?? "null"}");
+            //logger?.LogInformation($"AzureQueueStorageConnectionString: {queueConnStr ?? "null"}");
+            //logger?.LogInformation($"QueueName: {queueName ?? "null"}");
 
             if (string.IsNullOrWhiteSpace(blobConnStr) || string.IsNullOrWhiteSpace(queueConnStr) || string.IsNullOrWhiteSpace(queueName))
             {
+                _logger.LogError("One or more configuration settings are missing or invalid.");
                 throw new ArgumentException("Blob or Queue connection settings are missing.");
             }
 
@@ -116,8 +116,8 @@ namespace ExperimentProcessing
         /// <returns>Path to the fetched file or a message indicating the result.</returns>
         public async Task<string> FetchInputFileAsync(string fileName)
         {
-            var container = _blobClient.GetBlobContainerClient("inputfiles");
-            var blob = container.GetBlobClient(fileName);
+            var container = _blobClient.GetBlobContainerClient("containersub4");
+            var blob = container.GetBlobClient("8.png");
 
             if (!await container.ExistsAsync() || !await blob.ExistsAsync())
             {

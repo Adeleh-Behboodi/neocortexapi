@@ -19,6 +19,8 @@ namespace NeoCortexApiSample
     /// </summary>
     public class SpatialPatternLearning
     {
+
+        private const double val_minoctoverlapcycles = 0.1; 
         /// <summary>
         /// Executes the spatial pattern learning experiment based on the specified parameters.
         /// </summary>
@@ -28,18 +30,16 @@ namespace NeoCortexApiSample
         public void Run(string experimentId, string maxValue, string inputFolderLocation)
         {
             Console.WriteLine($"Starting experiment: {nameof(SpatialPatternLearning)}");
-
-            // Configuration for the Hierarchical Temporal Memory (HTM) model
-            double maxBoost = 5.0;
+            double maxMessages = 5.0;
             int inputBits = 200;
             int numColumns = 1024;
 
             var config = new HtmConfig(new int[] { inputBits }, new int[] { numColumns })
             {
                 CellsPerColumn = 10,
-                MaxBoost = maxBoost,
+                MaxBoost = maxMessages,
                 DutyCyclePeriod = 100,
-                MinPctOverlapDutyCycles = 1.0,
+                MinPctOverlapDutyCycles = val_minoctoverlapcycles,
                 GlobalInhibition = false,
                 NumActiveColumnsPerInhArea = 0.02 * numColumns,
                 PotentialRadius = (int)(0.15 * inputBits),

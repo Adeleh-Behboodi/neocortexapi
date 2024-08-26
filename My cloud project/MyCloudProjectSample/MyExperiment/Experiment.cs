@@ -40,6 +40,7 @@ namespace MyExperiment
             this.configurationSection = configurationSection;
             this.storageProvider1 = storageProvider1;
             this.logger = logger;
+            config = new MyConfig();
         }
 
         public Task<IExperimentResult> RunAsync(string inputData)

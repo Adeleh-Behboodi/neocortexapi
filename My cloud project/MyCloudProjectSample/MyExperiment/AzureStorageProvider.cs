@@ -4,9 +4,12 @@ using Azure.Storage.Blobs;
 using Azure.Storage.Queues;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
+using MyCloudProject.Common;
+using MyExperiment;
 using System;
 using System.IO;
 using System.Linq;
+using System.Runtime;
 using System.Text;
 using System.Text.Json;
 using System.Threading;
@@ -15,50 +18,16 @@ using System.Threading.Tasks;
 namespace ExperimentProcessing
 {
     /// <summary>
-    /// Interface for handling storage operations related to experiments.
-    /// This interface defines methods to interact with Azure Storage services
-    /// such as uploading and downloading files, and processing queue messages.
-    /// </summary>
-    public interface IStorageService
-    {
-        /// <summary>
-        /// Saves the experiment request.
-        /// </summary>
-        /// <param name="request">The experiment request to save.</param>
-        Task SaveExperimentAsync(ExperimentRequest request);
-
-        /// <summary>
-        /// Fetches an input file from blob storage.
-        /// </summary>
-        /// <param name="fileName">Name of the file to fetch.</param>
-        /// <returns>Path to the fetched file or a message indicating the result.</returns>
-        Task<string> FetchInputFileAsync(string fileName);
-
-        /// <summary>
-        /// Retrieves an experiment request from the queue.
-        /// </summary>
-        /// <param name="cancellationToken">Cancellation token to cancel the operation.</param>
-        /// <returns>An experiment request object if found, otherwise null.</returns>
-        Task<ExperimentRequest> GetExperimentRequestAsync(CancellationToken cancellationToken);
-
-        /// <summary>
-        /// Uploads the experiment result to blob storage.
-        /// </summary>
-        /// <param name="experimentId">ID of the experiment.</param>
-        /// <param name="result">Result object to upload.</param>
-        Task UploadExperimentResultAsync(string experimentId, IExperimentResult result);
-    }
-
-    /// <summary>
     /// Implementation of IStorageService using Azure Storage services.
     /// This class handles operations like downloading input files from blob storage, 
     /// processing messages from an Azure Queue, and uploading results to blob storage.
     /// </summary>
-    public class AzureStorageProvider : IStorageService
+    public class AzureStorageProvider : IStorageProvider
     {
         private readonly ConfigSettings _settings;
         private readonly BlobServiceClient _blobClient;
         private readonly QueueClient _queueClient;
+        private readonly TableClient _tableClient;
         private readonly ILogger<AzureStorageProvider> _logger;
 
         /// <summary>
@@ -72,10 +41,13 @@ namespace ExperimentProcessing
             var blobConnStr = configurationRoot.GetValue<string>("AzureBlobStorageConnectionString");
             var queueConnStr = configurationRoot.GetValue<string>("AzureQueueStorageConnectionString");
             var queueName = configurationRoot.GetValue<string>("Queue");
+            var tableName = configurationRoot.GetValue<string>("ResultTable");
 
-            //logger?.LogInformation($"AzureBlobStorageConnectionString: {blobConnStr ?? "null"}");
-            //logger?.LogInformation($"AzureQueueStorageConnectionString: {queueConnStr ?? "null"}");
-            //logger?.LogInformation($"QueueName: {queueName ?? "null"}");
+            logger?.LogInformation($"AzureBlobStorageConnectionString: {blobConnStr ?? "null"}");
+            logger?.LogInformation($"AzureQueueStorageConnectionString: {queueConnStr ?? "null"}");
+            logger?.LogInformation($"QueueName: {queueName ?? "null"}");
+            logger?.LogInformation($"TableName: {tableName ?? "null"}");
+
 
             if (string.IsNullOrWhiteSpace(blobConnStr) || string.IsNullOrWhiteSpace(queueConnStr) || string.IsNullOrWhiteSpace(queueName))
             {
@@ -85,6 +57,8 @@ namespace ExperimentProcessing
 
             _blobClient = new BlobServiceClient(blobConnStr);
             _queueClient = new QueueClient(queueConnStr, queueName);
+            _tableClient = new TableClient(blobConnStr, tableName);
+
             _logger = logger;
         }
 
@@ -92,7 +66,7 @@ namespace ExperimentProcessing
         /// Saves the experiment request to the system.
         /// </summary>
         /// <param name="request">The experiment request to save.</param>
-        public async Task SaveExperimentAsync(ExperimentRequest request)
+        public async Task SaveExperimentAsync(ExerimentRequest request)
         {
             try
             {
@@ -138,31 +112,49 @@ namespace ExperimentProcessing
         /// </summary>
         /// <param name="cancellationToken">Cancellation token to cancel the operation.</param>
         /// <returns>An experiment request object if found, otherwise null.</returns>
-        public async Task<ExperimentRequest> GetExperimentRequestAsync(CancellationToken cancellationToken)
+        public async Task<ExerimentRequest> GetExperimentRequestAsync(CancellationToken cancellationToken)
         {
             while (!cancellationToken.IsCancellationRequested)
             {
-                var messages = await _queueClient.ReceiveMessagesAsync(maxMessages: 1, visibilityTimeout: TimeSpan.FromMinutes(1), cancellationToken: cancellationToken);
+                var messages = await _queueClient.ReceiveMessagesAsync
+                    (maxMessages: 1, 
+                    visibilityTimeout: TimeSpan.FromMinutes(1), 
+                    cancellationToken: cancellationToken);
+                _logger.LogInformation($"Received {messages.Value.Length} message(s) from the queue.");
 
                 if (messages.Value.Length == 0)
                 {
-                    await Task.Delay(5000, cancellationToken); // Wait before checking the queue again
-                    continue;
+                    await Task.Delay(5000, cancellationToken);
+                    _logger.LogInformation("Queue is empty. No messages found.");
+                    return null; 
+                    //continue;
                 }
 
                 var message = messages.Value[0];
                 try
                 {
                     var json = Encoding.UTF8.GetString(Convert.FromBase64String(message.MessageText));
-                    var request = JsonSerializer.Deserialize<ExperimentRequest>(json);
-                    await _queueClient.DeleteMessageAsync(message.MessageId, message.PopReceipt);
+                    //var json = message.MessageText;
+                    _logger.LogInformation($"Message content: {json}"); 
+                    Console.WriteLine($"JSON: {json}");
+                    
+                    var request = JsonSerializer.Deserialize<ExerimentRequest>(json);
+                   // await _queueClient.DeleteMessageAsync(message.MessageId, message.PopReceipt);
                     return request;
+                }
+                catch (JsonException ex)
+                {
+                    _logger.LogError($"........................JSON deserialization error: {ex.Message}");
                 }
                 catch (Exception ex)
                 {
                     _logger.LogError(ex, "Error processing queue message.");
                     await _queueClient.DeleteMessageAsync(message.MessageId, message.PopReceipt);
                 }
+                //finally
+                //{
+                //    await _queueClient.DeleteMessageAsync(message.MessageId, message.PopReceipt);
+                //}
             }
 
             return null;
@@ -175,7 +167,8 @@ namespace ExperimentProcessing
         /// <param name="result">Result object to upload.</param>
         public async Task UploadExperimentResultAsync(string experimentId, IExperimentResult result)
         {
-            var container = _blobClient.GetBlobContainerClient("results");
+            var container = _blobClient.GetBlobContainerClient("outputfile");
+
             await container.CreateIfNotExistsAsync();
             var blobName = $"{experimentId}_{DateTime.UtcNow:yyyyMMddHHmmss}.json";
             var blob = container.GetBlobClient(blobName);
@@ -185,7 +178,86 @@ namespace ExperimentProcessing
 
             _logger.LogInformation($"Result uploaded to blob: {blob.Uri}");
         }
+
+        public async Task ProcessAndUploadResultsAsync()
+        {
+            var container = _blobClient.GetBlobContainerClient("outputfile");
+
+            if (!await container.ExistsAsync())
+            {
+                _logger.LogWarning("Blob container 'outputfile' does not exist.");
+                return;
+            }
+
+            await foreach (var blobItem in container.GetBlobsAsync())
+            {
+                var blobClient = container.GetBlobClient(blobItem.Name);
+                var stream = new MemoryStream();
+
+                try
+                {
+                    await blobClient.DownloadToAsync(stream);
+                    stream.Position = 0; 
+
+                    var json = Encoding.UTF8.GetString(stream.ToArray());
+                    var result = JsonSerializer.Deserialize<IExperimentResult>(json);
+
+                    if (result != null)
+                    {
+                        await UploadExperimentResultToTableAsync(result);
+                    }
+                    else
+                    {
+                        _logger.LogWarning($"Failed to deserialize the blob content for blob: {blobItem.Name}");
+                    }
+                }
+                catch (Exception ex)
+                {
+                    _logger.LogError(ex, $"Error processing blob: {blobItem.Name}");
+                }
+            }
+        }
+
+        public async Task UploadExperimentResultToTableAsync(IExperimentResult result)
+        {
+            try
+            {
+                if (result == null)
+                {
+                    throw new ArgumentNullException(nameof(result), "Experiment result cannot be null.");
+                }
+
+                var tableName = "tablesub4";
+                var tableClient = _tableClient;
+
+                await _tableClient.CreateIfNotExistsAsync();
+
+                var entity = new ExperimentResultEntity
+                {
+                    PartitionKey = result.ExperimentId,
+                    RowKey = $"{result.ExperimentId}_{DateTime.UtcNow:yyyyMMddHHmmss}",
+                    ExperimentId = result.ExperimentId,
+                    StartTimeUtc = result.StartTimeUtc,
+                    EndTimeUtc = result.EndTimeUtc,
+                    Duration = result.Duration,
+                    InputFileUrl = result.InputFileUrl
+                };
+
+                await tableClient.UpsertEntityAsync(entity, TableUpdateMode.Merge);
+
+                _logger.LogInformation($"Experiment result uploaded to table: {tableName}");
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error uploading experiment result to table.");
+                throw;
+            }
+        }
+
     }
+
+
+
 
     /// <summary>
     /// Configuration settings for the AzureStorageProvider.
@@ -196,28 +268,4 @@ namespace ExperimentProcessing
         public string TableStorageConnectionString { get; set; }
     }
 
-    /// <summary>
-    /// Represents a request for an experiment.
-    /// </summary>
-    public class ExperimentRequest
-    {
-        public string InputFile { get; set; }
-    }
-
-    /// <summary>
-    /// Interface for experiment results.
-    /// </summary>
-    public interface IExperimentResult
-    {
-        string ExperimentId { get; }
-    }
-
-    /// <summary>
-    /// Represents the result of an experiment.
-    /// </summary>
-    public class ExperimentResult : IExperimentResult
-    {
-        public string ExperimentId { get; set; }
-        public ExperimentResult(string id) => ExperimentId = id;
-    }
 }

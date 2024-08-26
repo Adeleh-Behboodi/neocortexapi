@@ -23,7 +23,6 @@ namespace MyCloudProject
 
         static async Task Main(string[] args)
         {
-            // Set up cancellation token to handle application shutdown
             var tokenSource = new CancellationTokenSource();
             Console.CancelKeyPress += (sender, e) =>
             {
@@ -47,7 +46,7 @@ namespace MyCloudProject
             var storageProvider = new AzureStorageProvider(configurationSection, logger);
 
             // Try downloading an input file
-            var testFileName = "8.png";
+            var testFileName = ".png";
             try
             {
                 logger?.LogInformation($"Starting download of file: {testFileName}");
@@ -97,7 +96,7 @@ namespace MyCloudProject
 
                         var result = await experiment.RunAsync(localFileWithInputArgs);//
 
-                        await storageProvider.UploadExperimentResultAsync("outputfile", (ExperimentProcessing.IExperimentResult)result);
+                        await storageProvider.UploadExperimentResultAsync("outputfile", (IExperimentResult)result);
 
 
 

@@ -7,11 +7,10 @@ namespace MyCloudProject.Common
 {
     public interface IExperimentResult
     {
-        public string ExperimentId { get; set; }
-        public string InputFileUrl { get; set; }
-        public DateTime? StartTimeUtc { get; set; }
-        public DateTime? EndTimeUtc { get; set; }
-        public TimeSpan Duration { get; set; }
+        string ExperimentId { get; set; } 
+        string InputFileUrl { get; set; }
+        DateTime? StartTimeUtc { get; set; }
+        DateTime? EndTimeUtc { get; set; }
+        TimeSpan Duration { get; set; }
     }
-
 }

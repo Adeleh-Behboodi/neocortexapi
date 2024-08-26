@@ -10,6 +10,8 @@ using System.Diagnostics;
 using System.Drawing;
 using System.IO;
 using System.Linq;
+using MyCloudProject.Common;
+
 
 namespace NeoCortexApiSample
 {
@@ -29,6 +31,13 @@ namespace NeoCortexApiSample
         /// <param name="inputFolderLocation">Path to the folder containing input image files for the experiment.</param>
         public void Run(string experimentId, string maxValue, string inputFolderLocation)
         {
+            var experimentResult = new ExerimentRequest
+            {
+                ExperimentId = experimentId,
+                InputFileUrl = inputFolderLocation,
+                StartTimeUtc = DateTime.UtcNow
+            };
+
             Console.WriteLine($"Starting experiment: {nameof(SpatialPatternLearning)}");
             double maxMessages = 5.0;
             int inputBits = 200;
@@ -72,6 +81,9 @@ namespace NeoCortexApiSample
                     Console.WriteLine("Invalid experiment ID.");
                     break;
             }
+            experimentResult.EndTimeUtc = DateTime.UtcNow;
+            Console.WriteLine($"Experiment Duration: {experimentResult.Duration}");
+        
         }
 
         /// <summary>

@@ -20,10 +20,7 @@ The objective is to assess the system's ability to accurately process and recons
 
 1- My Experiment [link](https://github.com/Adeleh-Behboodi/neocortexapi/blob/CodeX/My%20cloud%20project/MyCloudProjectSample/MyExperiment/MyExperiment.csproj)
 
-2- SpartialPatternLearning.cs [link](https://github.com/Adeleh-Behboodi/neocortexapi/blob/CodeX/My%20cloud%20project/MyCloudProjectSample/MyExperiment/SpartialPatternLearning.cs)
-
-3- 
-
+2- SpartialPatternLearning.cs [link](https://github.com/Adeleh-Behboodi/neocortexapi/blob/CodeX/My%20cloud%20project/MyCloudProjectSample/MyExperiment/SpartialPatternLearning.cs) 
 
 
 # Tools and Platforms Required for the Implementation of the Project:
@@ -53,10 +50,10 @@ A place to host Docker images built from source code.
 Facilitating the distribution and management of Docker images.
 
 ![Fig.1](https://github.com/Adeleh-Behboodi/neocortexapi/blob/CodeX/My%20cloud%20project/MyCloudProjectSample/Documentation/Docker%20desktop%20-%20Images.png)
-_ Fig.1 Building Docker Image_
+											#Fig.1 Building Docker Image
 
 ![Fig.2](https://github.com/Adeleh-Behboodi/neocortexapi/blob/CodeX/My%20cloud%20project/MyCloudProjectSample/Documentation/Docker%20desktop%20-%20containers.png)
-_ Fig.2 Building Docker Container_
+#Fig.2 Building Docker Container
 
 
 #### 3- Azure Container Registry (ACR): 
@@ -65,13 +62,11 @@ Suitable for integration with other Azure services.
 Azure Container Instances (ACI): Management and implementation of container programs.
 
 ![Fig.3](https://github.com/Adeleh-Behboodi/neocortexapi/blob/CodeX/My%20cloud%20project/MyCloudProjectSample/Documentation/Azure%20Resource%20Group%20Overview.png)
-
-_Fig.3 : Azure Resource group _
+#Fig.3 : Azure Resource group 
 
 
 ![Fig.4](https://github.com/Adeleh-Behboodi/neocortexapi/blob/CodeX/My%20cloud%20project/MyCloudProjectSample/Documentation/Azure%20Storage%20account%20-%20Containers%20.png)
-
-_Fig.4 : Azure Storage account _
+#Fig.4 : Azure Storage account 
 
 
 #### 4- Azure Container Instances (ACI): 
@@ -80,7 +75,7 @@ Ensuring scalable and stable execution of Docker containers.
 
 ![Fig.5]()
 
-_Fig.5 : Azure Container Instance _
+#Fig.5 : Azure Container Instance
 
 
 #### 5- Azure Blob Storage (Input):
@@ -96,5 +91,5 @@ Ensuring efficient and scalable data storage and retrieval.
 
 # Conclusion
 
-The Neocortex API project utilizes to Azure Cloud to process image and scalar data based on neocortex principles. Experiments demonstrated its effectiveness in encoding, spatial pooling, and reconstruction of data. Scalar data were encoded and binarized images were processed to capture spatial patterns. Reconstructed outputs showed average similarity to the originals, with images exhibiting more noise than scalar inputs. Increasing the threshold reduced noise but affected image quality. Future work could focus on improving encoding and reconstruction methods and exploring real-world applications like image recognition and anomaly detection.
-This method ensures that users can effectively manage and analyze large datasets, allowing them to generate valuable insights and make robust predictions with ease. In addition, this method that facilitates the binarization of images and numbers using neocortex algorithms
+The Neocortex API project leverages Azure Cloud to process image and scalar data based on neocortex principles. Experiments involved encoding scalar data and binarizing images to capture spatial patterns, with the results showing that reconstructed images had more noise compared to scalar data. Increasing the threshold reduced noise but compromised image quality. The training process for the spatial pooler continued until stability was achieved, overseen by the HomeostaticPlasticityController (HPC) class. 
+Future work could focus on enhancing encoding and reconstruction methods and exploring practical applications such as image recognition and anomaly detection.

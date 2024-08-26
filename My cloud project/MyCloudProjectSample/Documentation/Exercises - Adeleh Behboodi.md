@@ -90,19 +90,26 @@ Input data processing and output generation.
 Fig.6 : Azure Storage account - overview
 
 
+![Fig.7]()
+Fig.7 : Input file
+
+![Fig.8]()
+Fig.8 : output file
+
+
 ### 7- Azure Table Storage :
 Store processed data in a structured format without the need for SQL.
 Ensuring efficient and scalable data storage and retrieval.
 
-![Fig.7](https://github.com/Adeleh-Behboodi/neocortexapi/blob/CodeX/My%20cloud%20project/MyCloudProjectSample/Documentation/trigger-queue.png)
-Fig.7 : trigger-queue
+![Fig.9](https://github.com/Adeleh-Behboodi/neocortexapi/blob/CodeX/My%20cloud%20project/MyCloudProjectSample/Documentation/trigger-queue.png)
+Fig.9 : trigger-queue
 
-![Fig.8](https://github.com/Adeleh-Behboodi/neocortexapi/blob/CodeX/My%20cloud%20project/MyCloudProjectSample/Documentation/Message1-2%20%20in%20queue.png)
-![Fig.8](https://github.com/Adeleh-Behboodi/neocortexapi/blob/CodeX/My%20cloud%20project/MyCloudProjectSample/Documentation/Message3-4%20%20in%20queue.png)
-Fig.8 
+![Fig.10](https://github.com/Adeleh-Behboodi/neocortexapi/blob/CodeX/My%20cloud%20project/MyCloudProjectSample/Documentation/Message1-2%20%20in%20queue.png)
+![Fig.10](https://github.com/Adeleh-Behboodi/neocortexapi/blob/CodeX/My%20cloud%20project/MyCloudProjectSample/Documentation/Message3-4%20%20in%20queue.png)
+Fig.8 : Messages 
 
-![Fig.9](https://github.com/Adeleh-Behboodi/neocortexapi/blob/CodeX/My%20cloud%20project/MyCloudProjectSample/Documentation/tablesub4.png)
-Fig.9 : tables 
+![Fig.11](https://github.com/Adeleh-Behboodi/neocortexapi/blob/CodeX/My%20cloud%20project/MyCloudProjectSample/Documentation/tablesub4.png)
+Fig.11 : tables 
 
 
 # Conclusion

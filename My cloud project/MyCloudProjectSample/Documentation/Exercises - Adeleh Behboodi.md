@@ -42,22 +42,23 @@ The objective is to assess the system's ability to accurately process and recons
 
 # Components and application:
 
-#### 1- Source code repository (GitHub): 
+### 1- Source code repository (GitHub): 
 A place to store program codes.
 
 
-#### 2- Docker : 
+### 2- Docker : 
 A place to host Docker images built from source code.
 Facilitating the distribution and management of Docker images.
 
 ![Fig.1](https://github.com/Adeleh-Behboodi/neocortexapi/blob/CodeX/My%20cloud%20project/MyCloudProjectSample/Documentation/Docker%20desktop%20-%20Images.png)
 Fig.1 Building Docker Image
 
+
 ![Fig.2](https://github.com/Adeleh-Behboodi/neocortexapi/blob/CodeX/My%20cloud%20project/MyCloudProjectSample/Documentation/Docker%20desktop%20-%20containers.png)
 Fig.2 Building Docker Container
 
 
-#### 3- Azure Container Registry (ACR): 
+### 3- Azure Container Registry (ACR): 
 Secure space to store and manage Docker images in Azure environment.
 Suitable for integration with other Azure services.
 Azure Container Instances (ACI): Management and implementation of container programs.
@@ -66,7 +67,7 @@ Azure Container Instances (ACI): Management and implementation of container prog
 Fig.3 : Azure Resource group 
 
 
-#### 4- Azure Container Instances (ACI): 
+### 4- Azure Container Instances (ACI): 
 Management and implementation of container programs.
 Ensuring scalable and stable execution of Docker containers.
 
@@ -74,14 +75,14 @@ Ensuring scalable and stable execution of Docker containers.
 Fig.4 : Azure Container Instance
 
 
-#### 5- Azure Blob Storage (Input and out output):
+### 5- Azure Blob Storage (Input and out output):
 Providing unlimited storage space for incoming data. Provide the required input data for the application container.
 
 ![Fig.5](https://github.com/Adeleh-Behboodi/neocortexapi/blob/CodeX/My%20cloud%20project/MyCloudProjectSample/Documentation/Azure%20Storage%20account%20-%20Containers%20.png)
 Fig.5 : Azure Storage account 
 
 
-#### 6- Application container:
+### 6- Application container:
 Running the application inside a Docker container.
 Input data processing and output generation.
 
@@ -89,7 +90,7 @@ Input data processing and output generation.
 Fig.6 : Azure Storage account - overview
 
 
-#### 7- Azure Table Storage :
+### 7- Azure Table Storage :
 Store processed data in a structured format without the need for SQL.
 Ensuring efficient and scalable data storage and retrieval.
 

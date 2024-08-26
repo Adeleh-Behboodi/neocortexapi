@@ -53,22 +53,35 @@ A place to host Docker images built from source code.
 Facilitating the distribution and management of Docker images.
 
 ![Fig.1](https://github.com/Adeleh-Behboodi/neocortexapi/blob/CodeX/My%20cloud%20project/MyCloudProjectSample/Documentation/Docker%20desktop%20-%20Images.png)
-_Fig.1 Building Docker Image_
+_ Fig.1 Building Docker Image_
 
 ![Fig.2](https://github.com/Adeleh-Behboodi/neocortexapi/blob/CodeX/My%20cloud%20project/MyCloudProjectSample/Documentation/Docker%20desktop%20-%20containers.png)
-_Fig.2 Building Docker Container_
+_ Fig.2 Building Docker Container_
+
 
 #### 3- Azure Container Registry (ACR): 
 Secure space to store and manage Docker images in Azure environment.
 Suitable for integration with other Azure services.
 Azure Container Instances (ACI): Management and implementation of container programs.
 
-![Fig.3]()
-_Fig.3 Azure Container Registry_
+![Fig.3](https://github.com/Adeleh-Behboodi/neocortexapi/blob/CodeX/My%20cloud%20project/MyCloudProjectSample/Documentation/Azure%20Resource%20Group%20Overview.png)
+
+_Fig.3 : Azure Resource group _
+
+
+![Fig.4](https://github.com/Adeleh-Behboodi/neocortexapi/blob/CodeX/My%20cloud%20project/MyCloudProjectSample/Documentation/Azure%20Storage%20account%20-%20Containers%20.png)
+
+_Fig.4 : Azure Storage account _
+
 
 #### 4- Azure Container Instances (ACI): 
 Management and implementation of container programs.
 Ensuring scalable and stable execution of Docker containers.
+
+![Fig.5]()
+
+_Fig.5 : Azure Container Instance _
+
 
 #### 5- Azure Blob Storage (Input):
 Providing unlimited storage space for incoming data. Provide the required input data for the application container.

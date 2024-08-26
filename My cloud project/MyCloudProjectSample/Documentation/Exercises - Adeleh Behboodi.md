@@ -90,10 +90,10 @@ Input data processing and output generation.
 Fig.6 : Azure Storage account - overview
 
 
-![Fig.7]()
+![Fig.7](https://github.com/Adeleh-Behboodi/neocortexapi/blob/CodeX/My%20cloud%20project/MyCloudProjectSample/Documentation/containersub4.png)
 Fig.7 : Input file
 
-![Fig.8]()
+![Fig.8](https://github.com/Adeleh-Behboodi/neocortexapi/blob/CodeX/My%20cloud%20project/MyCloudProjectSample/Documentation/outputfile.png)
 Fig.8 : output file
 
 

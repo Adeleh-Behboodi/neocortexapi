@@ -108,7 +108,7 @@ Fig.9 : trigger-queue
 ![Fig.10](https://github.com/Adeleh-Behboodi/neocortexapi/blob/CodeX/My%20cloud%20project/MyCloudProjectSample/Documentation/Message3-4%20%20in%20queue.png)
 Fig.8 : Messages 
 
-![Fig.11](https://github.com/Adeleh-Behboodi/neocortexapi/blob/CodeX/My%20cloud%20project/MyCloudProjectSample/Documentation/tablesub4.png)
+![Fig.11](https://github.com/Adeleh-Behboodi/neocortexapi/blob/CodeX/My%20cloud%20project/MyCloudProjectSample/Documentation/table.png)
 Fig.11 : tables 
 
 

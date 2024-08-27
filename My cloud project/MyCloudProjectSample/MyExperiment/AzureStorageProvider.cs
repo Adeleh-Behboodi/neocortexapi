@@ -57,7 +57,8 @@ namespace ExperimentProcessing
 
             _blobClient = new BlobServiceClient(blobConnStr);
             _queueClient = new QueueClient(queueConnStr, queueName);
-            _tableClient = new TableClient(blobConnStr, tableName);
+            var serviceClient = new TableServiceClient(blobConnStr);
+            _tableClient = serviceClient.GetTableClient(tableName);
 
             _logger = logger;
         }
@@ -91,7 +92,7 @@ namespace ExperimentProcessing
         public async Task<string> FetchInputFileAsync(string fileName)
         {
             var container = _blobClient.GetBlobContainerClient("containersub4");
-            var blob = container.GetBlobClient("8.png");
+            var blob = container.GetBlobClient("pic3 (21).png");
 
             if (!await container.ExistsAsync() || !await blob.ExistsAsync())
             {
@@ -139,7 +140,7 @@ namespace ExperimentProcessing
                     Console.WriteLine($"JSON: {json}");
                     
                     var request = JsonSerializer.Deserialize<ExerimentRequest>(json);
-                   // await _queueClient.DeleteMessageAsync(message.MessageId, message.PopReceipt);
+                    await _queueClient.DeleteMessageAsync(message.MessageId, message.PopReceipt);
                     return request;
                 }
                 catch (JsonException ex)
@@ -230,17 +231,15 @@ namespace ExperimentProcessing
                 var tableName = "tablesub4";
                 var tableClient = _tableClient;
 
-                await _tableClient.CreateIfNotExistsAsync();
+                await tableClient.CreateIfNotExistsAsync();
 
-                var entity = new ExperimentResultEntity
+                var entity = new TableEntity(tableName, Guid.NewGuid().ToString())
                 {
-                    PartitionKey = result.ExperimentId,
-                    RowKey = $"{result.ExperimentId}_{DateTime.UtcNow:yyyyMMddHHmmss}",
-                    ExperimentId = result.ExperimentId,
-                    StartTimeUtc = result.StartTimeUtc,
-                    EndTimeUtc = result.EndTimeUtc,
-                    Duration = result.Duration,
-                    InputFileUrl = result.InputFileUrl
+                    { "ExperimentId", result.ExperimentId },
+                    { "StartTimeUtc", result.StartTimeUtc },
+                    { "EndTimeUtc", result.EndTimeUtc },
+                    { "Duration", result.Duration },
+                    { "InputFileUrl", result.InputFileUrl },
                 };
 
                 await tableClient.UpsertEntityAsync(entity, TableUpdateMode.Merge);

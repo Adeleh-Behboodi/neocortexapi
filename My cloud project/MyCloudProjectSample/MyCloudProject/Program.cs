@@ -75,7 +75,7 @@ namespace MyCloudProject
             // Main loop to handle experiment requests
             while (!tokenSource.Token.IsCancellationRequested)
             {
-                var request = await storageProvider.GetExperimentRequestAsync(tokenSource.Token); // اصلاح نام متد
+                var request = await storageProvider.GetExperimentRequestAsync(tokenSource.Token); 
 
                 if (request != null)
                 {
@@ -94,11 +94,11 @@ namespace MyCloudProject
                             logger?.LogWarning($"Failed to download input file: {request.InputFile}");
                         }
 
-                        var result = await experiment.RunAsync(localFileWithInputArgs);//
+                        var result = await experiment.RunAsync(localFileWithInputArgs);
 
                         await storageProvider.UploadExperimentResultAsync("outputfile", (IExperimentResult)result);
 
-
+                        await storageProvider.UploadExperimentResultToTableAsync(result);
 
                         await storageProvider.SaveExperimentAsync(request);
                     }

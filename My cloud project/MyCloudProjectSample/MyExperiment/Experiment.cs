@@ -3,8 +3,10 @@ using Azure.Storage.Queues.Models;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using MyCloudProject.Common;
+using NeoCortexApiSample;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Text;
 using System.Text.Json;
 using System.Threading;
@@ -43,21 +45,45 @@ namespace MyExperiment
             config = new MyConfig();
         }
 
+        /// <summary>
+        /// Runs the experiment asynchronously using the provided input data.
+        /// </summary>
+        /// <param name="inputData">Input data required to run the experiment.</param>
+        /// <returns>A task that represents the asynchronous operation.</returns>
+        public async Task<IExperimentResult> RunAsync(ExerimentRequest inputData)
+        {
+            // Log the start of the experiment
+            logger?.LogInformation("Initializing SpatialPatternLearning experiment...");
+
+            // Initialize the experiment instance
+            SpatialPatternLearning experiment1 = new SpatialPatternLearning();
+
+            // Run the experiment using the provided input data
+            try
+            {
+                experiment1.Run(inputData.ExperimentId, inputData.MaxValue, inputData.InputFileUrl);
+            }
+            catch (Exception ex)
+            {
+                logger?.LogError($"An error occurred while running the experiment: {ex.Message}");
+                throw;
+            }
+
+            // Create the experiment result
+            ExperimentResult res = new ExperimentResult(this.config.GroupId, null)
+            {
+                StartTimeUtc = DateTime.UtcNow,
+                OutputFile = Path.Combine(Directory.GetCurrentDirectory(), "RunRustructuringExperiment")
+            };
+
+            logger?.LogInformation("SpatialPatternLearning experiment completed.");
+
+            return await Task.FromResult<IExperimentResult>(res);
+        }
+
         public Task<IExperimentResult> RunAsync(string inputData)
         {
-            // TODO read file
-
-            // YOU START HERE WITH YOUR SE EXPERIMENT!!!!
-
-            ExperimentResult res = new ExperimentResult(this.config.GroupId, null);
-
-            // logging, logging and logging
-
-            res.StartTimeUtc = DateTime.UtcNow;
-
-            // Run your experiment code here.
-
-            return Task.FromResult<IExperimentResult>(res); // TODO...
+            throw new NotImplementedException();
         }
     }
 }

@@ -40,7 +40,12 @@ The objective is to assess the system's ability to accurately process and recons
 7- The function app : [link](https://portal.azure.com/#@stud.fra-uas.de/resource/subscriptions/5adcff6e-ace2-4012-b13c-dc7a940afff2/resourceGroups/RG-AB-SUB4/providers/Microsoft.Web/sites/SUB4/appServices)
 
 
+![Fig.1](https://github.com/Adeleh-Behboodi/neocortexapi/blob/CodeX/My%20cloud%20project/MyCloudProjectSample/Documentation/Diagram.png)
+Fig.1 Diagram
+
+
 # Components and application:
+
 
 ### 1- Source code repository (GitHub): 
 A place to store program codes.
@@ -50,12 +55,12 @@ A place to store program codes.
 A place to host Docker images built from source code.
 Facilitating the distribution and management of Docker images.
 
-![Fig.1](https://github.com/Adeleh-Behboodi/neocortexapi/blob/CodeX/My%20cloud%20project/MyCloudProjectSample/Documentation/Docker%20desktop%20-%20Images.png)
-Fig.1 Building Docker Image
+![Fig.2](https://github.com/Adeleh-Behboodi/neocortexapi/blob/CodeX/My%20cloud%20project/MyCloudProjectSample/Documentation/Docker%20desktop%20-%20Images.png)
+Fig.2 Building Docker Image
 
 
-![Fig.2](https://github.com/Adeleh-Behboodi/neocortexapi/blob/CodeX/My%20cloud%20project/MyCloudProjectSample/Documentation/Docker%20desktop%20-%20containers.png)
-Fig.2 Building Docker Container
+![Fig.3](https://github.com/Adeleh-Behboodi/neocortexapi/blob/CodeX/My%20cloud%20project/MyCloudProjectSample/Documentation/Docker%20desktop%20-%20containers.png)
+Fig.3 Building Docker Container
 
 
 ### 3- Azure Container Registry (ACR): 
@@ -63,53 +68,53 @@ Secure space to store and manage Docker images in Azure environment.
 Suitable for integration with other Azure services.
 Azure Container Instances (ACI): Management and implementation of container programs.
 
-![Fig.3](https://github.com/Adeleh-Behboodi/neocortexapi/blob/CodeX/My%20cloud%20project/MyCloudProjectSample/Documentation/Azure%20Resource%20Group%20Overview.png)
-Fig.3 : Azure Resource group 
+![Fig.4](https://github.com/Adeleh-Behboodi/neocortexapi/blob/CodeX/My%20cloud%20project/MyCloudProjectSample/Documentation/Azure%20Resource%20Group%20Overview.png)
+Fig.4 : Azure Resource group 
 
 
 ### 4- Azure Container Instances (ACI): 
 Management and implementation of container programs.
 Ensuring scalable and stable execution of Docker containers.
 
-![Fig.4](https://github.com/Adeleh-Behboodi/neocortexapi/blob/CodeX/My%20cloud%20project/MyCloudProjectSample/Documentation/Azure%20container%20instances.png)
-Fig.4 : Azure Container Instance
+![Fig.5](https://github.com/Adeleh-Behboodi/neocortexapi/blob/CodeX/My%20cloud%20project/MyCloudProjectSample/Documentation/Azure%20container%20instances.png)
+Fig.5 : Azure Container Instance
 
 
 ### 5- Azure Blob Storage (Input and out output):
 Providing unlimited storage space for incoming data. Provide the required input data for the application container.
 
-![Fig.5](https://github.com/Adeleh-Behboodi/neocortexapi/blob/CodeX/My%20cloud%20project/MyCloudProjectSample/Documentation/Azure%20Storage%20account%20-%20Containers%20.png)
-Fig.5 : Azure Storage account 
+![Fig.6](https://github.com/Adeleh-Behboodi/neocortexapi/blob/CodeX/My%20cloud%20project/MyCloudProjectSample/Documentation/Azure%20Storage%20account%20-%20Containers%20.png)
+Fig.6 : Azure Storage account 
 
 
 ### 6- Application container:
 Running the application inside a Docker container.
 Input data processing and output generation.
 
-![Fig.6](https://github.com/Adeleh-Behboodi/neocortexapi/blob/CodeX/My%20cloud%20project/MyCloudProjectSample/Documentation/Azure%20Storage%20account.png)
-Fig.6 : Azure Storage account - overview
+![Fig.7](https://github.com/Adeleh-Behboodi/neocortexapi/blob/CodeX/My%20cloud%20project/MyCloudProjectSample/Documentation/Azure%20Storage%20account.png)
+Fig.7 : Azure Storage account - overview
 
 
-![Fig.7](https://github.com/Adeleh-Behboodi/neocortexapi/blob/CodeX/My%20cloud%20project/MyCloudProjectSample/Documentation/containersub4.png)
-Fig.7 : Input file
+![Fig.8](https://github.com/Adeleh-Behboodi/neocortexapi/blob/CodeX/My%20cloud%20project/MyCloudProjectSample/Documentation/containersub4.png)
+Fig.8 : Input file
 
-![Fig.8](https://github.com/Adeleh-Behboodi/neocortexapi/blob/CodeX/My%20cloud%20project/MyCloudProjectSample/Documentation/outputfile.png)
-Fig.8 : output file
+![Fig.9](https://github.com/Adeleh-Behboodi/neocortexapi/blob/CodeX/My%20cloud%20project/MyCloudProjectSample/Documentation/outputfile.png)
+Fig.9 : output file
 
 
 ### 7- Azure Table Storage :
 Store processed data in a structured format without the need for SQL.
 Ensuring efficient and scalable data storage and retrieval.
 
-![Fig.9](https://github.com/Adeleh-Behboodi/neocortexapi/blob/CodeX/My%20cloud%20project/MyCloudProjectSample/Documentation/trigger-queue.png)
-Fig.9 : trigger-queue
+![Fig.10](https://github.com/Adeleh-Behboodi/neocortexapi/blob/CodeX/My%20cloud%20project/MyCloudProjectSample/Documentation/trigger-queue.png)
+Fig.10 : trigger-queue
 
-![Fig.10](https://github.com/Adeleh-Behboodi/neocortexapi/blob/CodeX/My%20cloud%20project/MyCloudProjectSample/Documentation/Message1-2%20%20in%20queue.png)
-![Fig.10](https://github.com/Adeleh-Behboodi/neocortexapi/blob/CodeX/My%20cloud%20project/MyCloudProjectSample/Documentation/Message3-4%20%20in%20queue.png)
-Fig.8 : Messages 
+![Fig.11](https://github.com/Adeleh-Behboodi/neocortexapi/blob/CodeX/My%20cloud%20project/MyCloudProjectSample/Documentation/Message1-2%20%20in%20queue.png)
+![Fig.12](https://github.com/Adeleh-Behboodi/neocortexapi/blob/CodeX/My%20cloud%20project/MyCloudProjectSample/Documentation/Message3-4%20%20in%20queue.png)
+Fig.11-12 : Messages 
 
-![Fig.11](https://github.com/Adeleh-Behboodi/neocortexapi/blob/CodeX/My%20cloud%20project/MyCloudProjectSample/Documentation/table.png)
-Fig.11 : tables 
+![Fig.13](https://github.com/Adeleh-Behboodi/neocortexapi/blob/CodeX/My%20cloud%20project/MyCloudProjectSample/Documentation/table.png)
+Fig.13 : tables 
 
 
 # Conclusion

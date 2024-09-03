@@ -30,6 +30,7 @@ namespace MyExperiment
         public string[] OutputFiles { get; set; }
         public float Accuracy { get; set; }
         public TimeSpan Duration { get; set; }
+        public string OutputFile { get; internal set; }
     }
     public class ExperimentResultEntity : ITableEntity, IExperimentResult
     {
@@ -38,6 +39,7 @@ namespace MyExperiment
         public DateTimeOffset? Timestamp { get; set; }
         public ETag ETag { get; set; }
 
+        public string OutputFile { get; set; }
         public string ExperimentId { get; set; }
         public string InputFileUrl { get; set; }
         public DateTime? StartTimeUtc { get; set; }

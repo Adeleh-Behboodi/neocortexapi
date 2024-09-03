@@ -22,7 +22,7 @@ namespace NeoCortexApiSample
     public class SpatialPatternLearning
     {
 
-        private const double val_minoctoverlapcycles = 0.1; 
+        private const double val_minoctoverlapcycles = 0.1;
         /// <summary>
         /// Executes the spatial pattern learning experiment based on the specified parameters.
         /// </summary>

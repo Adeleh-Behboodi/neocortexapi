@@ -14,7 +14,7 @@ namespace MyCloudProject.Common
         public string InputFileUrl { get; set; }
         public string Name { get; set; }
         public string MaxValue { get; set; }
-        public DateTime? StartTimeUtc { get; set; }  // باید public باشد
+        public DateTime? StartTimeUtc { get; set; } 
         public DateTime? EndTimeUtc { get; set; }
         public string Description { get; set; }
         public string MessageId { get; set; }

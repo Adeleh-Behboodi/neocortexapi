@@ -53,8 +53,8 @@ namespace MyExperiment
         public async Task<IExperimentResult> RunAsync(ExerimentRequest inputData)
         {
             // Log the start of the experiment
-            logger?.LogInformation("Initializing SpatialPatternLearning experiment...");
-
+            logger?.LogInformation("Starting the initialization process for SpatialPatternLearning experiment. Preparing required resources and settings.");
+            
             // Initialize the experiment instance
             SpatialPatternLearning experiment1 = new SpatialPatternLearning();
 
@@ -65,7 +65,7 @@ namespace MyExperiment
             }
             catch (Exception ex)
             {
-                logger?.LogError($"An error occurred while running the experiment: {ex.Message}");
+                logger?.LogError($"Error encountered during experiment execution. Details: {ex.Message}. StackTrace: {ex.StackTrace}");
                 throw;
             }
 

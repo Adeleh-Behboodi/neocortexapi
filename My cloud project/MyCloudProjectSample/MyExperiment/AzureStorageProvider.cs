@@ -97,7 +97,7 @@ namespace ExperimentProcessing
         public async Task<string> FetchInputFileAsync(string fileName)
         {
             var container = _blobClient.GetBlobContainerClient("containersub4");
-            var blob = container.GetBlobClient("pic3 (21).png");
+            var blob = container.GetBlobClient(".png");
 
             if (!await container.ExistsAsync() || !await blob.ExistsAsync())
             {
@@ -167,6 +167,26 @@ namespace ExperimentProcessing
 
             return null;
         }
+
+
+        public async Task UploadFileToBlobAsync(string localFilePath, string blobFileName)
+        {
+            var container = _blobClient.GetBlobContainerClient("outputfile");
+
+            // Create the container if it doesn't already exist
+            await container.CreateIfNotExistsAsync();
+
+            // Get a reference to the blob where the file will be uploaded
+            var blob = container.GetBlobClient(blobFileName);
+
+            // Open the local file stream and upload it to the blob storage
+            using var fileStream = File.OpenRead(localFilePath);
+            await blob.UploadAsync(fileStream, overwrite: true);
+
+            _logger.LogInformation($"File uploaded to blob: {blob.Uri}");
+        }
+
+
 
         /// <summary>
         /// Uploads the experiment result to Azure Blob Storage.

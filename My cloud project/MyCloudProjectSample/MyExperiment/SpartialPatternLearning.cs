@@ -11,6 +11,8 @@ using System.Drawing;
 using System.IO;
 using System.Linq;
 using MyCloudProject.Common;
+using ExperimentProcessing;
+using System.Threading.Tasks;
 
 
 namespace NeoCortexApiSample
@@ -239,7 +241,7 @@ namespace NeoCortexApiSample
         /// <param name="similarity">Similarity percentage of the reconstruction.</param>
         /// <param name="input">Input value used for naming the output file.</param>
         /// <param name="outputFolder">Path to the folder where images are saved.</param>
-        private void SaveReconstructedImage(int[] thresholdValues, double similarity, double input, string outputFolder)
+        public async Task SaveReconstructedImage(int[] thresholdValues, double similarity, double input, string outputFolder)
         {
             int width = (int)Math.Sqrt(thresholdValues.Length);
             int height = width;
@@ -258,7 +260,14 @@ namespace NeoCortexApiSample
                 string fileName = Path.Combine(outputFolder, $"Reconstruction_{input}_Similarity_{similarity}.png");
                 bitmap.Save(fileName);
                 Console.WriteLine($"Saved reconstructed image for input {input} with similarity {similarity}%.");
+                Console.WriteLine("Current working directory: " + Directory.GetCurrentDirectory());
+
+
+                //string blobFileName = Path.GetFileName(fileName);
+                //await azureStorageProvider.UploadFileToBlobAsync(fileName, blobFileName);
+
             }
+
         }
 
         /// <summary>

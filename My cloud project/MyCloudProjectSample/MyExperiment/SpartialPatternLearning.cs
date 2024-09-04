@@ -270,6 +270,171 @@ namespace NeoCortexApiSample
 
         }
 
+
+        /// <summary>
+        /// Converts the specified image file into a binary format based on pixel brightness.
+        /// </summary>
+        /// <param name="imagePath">Path to the input image file.</param>
+        /// <returns>An array of binary values representing the image.</returns>
+        private static int[] ConvertImageToBinary(string imagePath)
+        {
+            using (var bitmap = new Bitmap(imagePath))
+            {
+                int width = bitmap.Width;
+                int height = bitmap.Height;
+                int[] binaryImage = new int[width * height];
+
+                for (int y = 0; y < height; y++)
+                {
+                    for (int x = 0; x < width; x++)
+                    {
+                        Color pixelColor = bitmap.GetPixel(x, y);
+                        binaryImage[y * width + x] = pixelColor.R > 128 ? 1 : 0; // Simple thresholding
+                    }
+                }
+                return binaryImage;
+            }
+        }
+
+
+        /// <summary>
+        /// Provides methods for processing and saving images.
+        /// </summary>
+        public static class ImageUtils
+        {
+            /// <summary>
+            /// Writes a 2D array as an image file in PNG format.
+            /// </summary>
+            /// <param name="pixelData">2D array of pixel values.</param>
+            /// <param name="path">File path where the image will be saved.</param>
+            /// <param name="message">Description to be added to the image file.</param>
+            public static void SaveAsBitmap(int[,] pixelData, string path, string message)
+            {
+                int width = pixelData.GetLength(0);
+                int height = pixelData.GetLength(1);
+
+                using (var bitmap = new Bitmap(width, height))
+                {
+                    for (int y = 0; y < height; y++)
+                    {
+                        for (int x = 0; x < width; x++)
+                        {
+                            int pixelValue = pixelData[x, y] == 1 ? 255 : 0; // Changed logic
+                            bitmap.SetPixel(x, y, Color.FromArgb(pixelValue, pixelValue, pixelValue));
+                        }
+                    }
+                    bitmap.Save(path);
+                    Console.WriteLine($"{message} - Image saved to: {path}");
+                }
+            }
+        }
+
+
+        /// <summary>
+        /// Adjusts the reconstructed data to a normalized range of 0 to 1.
+        /// </summary>
+        /// <param name="data">A dictionary of data values to normalize.</param>
+        /// <returns>Normalized data as a dictionary.</returns>
+        private static Dictionary<int, double> NormalizeProbabilities(Dictionary<int, double> data)
+        {
+            double maxValue = data.Values.Max();
+            double minValue = data.Values.Min();
+            double range = maxValue - minValue;
+
+            return data.ToDictionary(
+                pair => pair.Key,
+                pair => range == 0 ? 0 : (pair.Value - minValue) / range
+            );
+        }
+
+
+        /// <summary>
+        /// Executes the image restructuring process and saves the results.
+        /// </summary>
+        /// <param name="pooler">The spatial pooler used for image reconstruction.</param>
+        /// <param name="inputFolder">Path to the folder containing input images.</param>
+        private static void ExecuteImageRestructuring(SpatialPooler pooler, string inputFolder)
+        {
+            string resultFolder = "ImageRestructuringResults";
+
+            // Create or recreate the results directory
+            if (Directory.Exists(resultFolder))
+            {
+                Directory.Delete(resultFolder, true);
+            }
+            Directory.CreateDirectory(resultFolder);
+
+            // Retrieve and process all image files from the input folder
+            string[] imageFiles = Directory.GetFiles(inputFolder);
+
+            foreach (string imagePath in imageFiles)
+            {
+                var binaryImage = ConvertImageToBinary(imagePath);  // Convert image to binary format
+                string baseFileName = Path.GetFileNameWithoutExtension(imagePath);
+                int[] invertedBinary = binaryImage.Select(pixel => pixel == 1 ? 0 : 1).ToArray();
+                int[,] reshapedArray = ArrayUtils.Make2DArray<int>(invertedBinary, (int)Math.Sqrt(invertedBinary.Length), (int)Math.Sqrt(invertedBinary.Length));
+                var transposedArray = ArrayUtils.Transpose(reshapedArray);
+
+                // Save the input image before reconstruction
+                string inputOutputPath = Path.Combine(resultFolder, $"{baseFileName}_input.png");
+                ImageUtils.SaveAsBitmap(transposedArray, inputOutputPath, "Input Image for Reconstruction");
+
+                // Perform spatial pooler reconstruction
+                var activeCols = pooler.Compute(invertedBinary, false);
+                var reconstructedData = pooler.Reconstruct(activeCols);
+                Dictionary<int, double> normalizedProbabilities = NormalizeProbabilities(reconstructedData);
+
+                // Apply threshold and calculate similarity
+                int[] thresholdedValues = ApplyBinaryThreshold(normalizedProbabilities.Values, 0.3, invertedBinary.Length);
+                int matchCount = invertedBinary.Zip(thresholdedValues, (original, reconstructed) => original == reconstructed ? 1 : 0).Sum();
+                double similarityPercentage = Math.Round((double)matchCount / invertedBinary.Length * 100, 2);
+                Console.WriteLine($"Similarity: {similarityPercentage}%");
+
+                // Save the reconstructed image with similarity percentage
+                string outputPath = Path.Combine(resultFolder, $"reconstructed_{similarityPercentage}.png");
+                int[,] outputArray = ArrayUtils.Make2DArray<int>(thresholdedValues, (int)Math.Sqrt(thresholdedValues.Length), (int)Math.Sqrt(thresholdedValues.Length));
+                ImageUtils.SaveAsBitmap(ArrayUtils.Transpose(outputArray), outputPath, $"Reconstructed Image with Similarity = {similarityPercentage}%");
+            }
+        }
+
+
+        /// <summary>
+        /// Applies a threshold to convert data into binary format.
+        /// </summary>
+        /// <param name="data">Data to be converted to binary format.</param>
+        /// <param name="threshold">Threshold value to be used.</param>
+        /// <param name="size">Size of the output binary array.</param>
+        /// <returns>An array of binary values.</returns>
+        private static int[] ApplyBinaryThreshold(IEnumerable<double> data, double threshold, int size)
+        {
+            int[] resultArray = new int[size];
+            int index = 0;
+            foreach (var value in data)
+            {
+                resultArray[index++] = value >= threshold ? 1 : 0; // Changed threshold logic
+            }
+            return resultArray;
+        }
+
+
+
+        /// <summary>
+        /// Normalizes the reconstructed data to a range of 0 to 1.
+        /// </summary>
+        /// <param name="data">Reconstructed data values.</param>
+        /// <returns>Normalized data as an array of doubles.</returns>
+        private static double[] NormalizeReconstructedData(Dictionary<int, double> data)
+        {
+            var max = data.Values.Max();
+            var min = data.Values.Min();
+            var range = max - min;
+
+            return data.Values
+                .Select(value => range == 0 ? 0 : (value - min) / range)
+                .ToArray();
+        }
+
+
         /// <summary>
         /// Normalizes the reconstructed data to a range of 0 to 1.
         /// </summary>
